@@ -16,7 +16,8 @@
     },
     "files": [
         { "path": "TerraformCLI/.dist", "packagePath": "TerraformCLI" },
-        { "path": "TerraformInstaller/.dist", "packagePath": "TerraformInstaller" }
+        { "path": "TerraformInstaller/.dist", "packagePath": "TerraformInstaller" },
+        { "path": "TerraformDisplay/.dist", "packagePath": "TerraformCLI" }
     ],
     "repository" : {
         "type" : "git",
@@ -51,7 +52,7 @@
         "license": {
             "uri": "https://github.com/charleszipp/azure-pipelines-tasks-terraform/blob/master/LICENSE"
         }
-    }, 
+    },
     "galleryFlags": [
         "Public",
         "Preview"
