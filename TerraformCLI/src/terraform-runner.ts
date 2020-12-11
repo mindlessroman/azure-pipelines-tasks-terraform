@@ -140,12 +140,14 @@ export class TerraformWithSecureVarFile extends TerraformCommandDecorator{
 
 export class TerraformWithShow extends TerraformCommandDecorator{
     private readonly inputFile: string | undefined;
-    constructor(builder: TerraformCommandBuilder, inputFile?: string |undefined) {
+    private readonly json: Boolean = true
+    constructor(builder: TerraformCommandBuilder, inputFile?: string |undefined, json: Boolean = true) {
         super(builder);
         this.inputFile =  inputFile;
+        this.json = json
     }
     async onRun(context: TerraformCommandContext): Promise<void>{
-        context.terraform.arg('-json');
+        if (this.json) { context.terraform.arg('-json'); }
         if(this.inputFile){
             context.terraform.arg(this.inputFile.toString())
         }
@@ -209,8 +211,8 @@ export class TerraformRunner{
         return this.with((builder) => new TerraformWithSecureVarFile(builder, taskAgent, secureVarFileId));
     }
 
-    withShowOptions(inputFile?: string | undefined): TerraformRunner{
-        return this.with((builder) => new TerraformWithShow(builder, inputFile));
+    withShowOptions(inputFile?: string | undefined, json: Boolean = true): TerraformRunner{
+        return this.with((builder) => new TerraformWithShow(builder, inputFile, json));
     }
 
     withLockID(lockID?: string | undefined): TerraformRunner{
