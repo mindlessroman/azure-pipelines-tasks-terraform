@@ -74,3 +74,7 @@ typings/
 
 #packaged output
 .dist/
+dist/
+
+azure-pipelines-tasks-terraform.code-workspace
+>>>>>>> 0c1ccbb... workable setup/code, still requires refactor && cleanup
