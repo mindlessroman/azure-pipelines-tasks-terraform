@@ -168,6 +168,20 @@ export class TerraformWithLockID extends TerraformCommandDecorator{
     }
 }
 
+export class TerraformRawOuputToFile extends TerraformCommandDecorator {
+    private readonly outputFile: string;
+
+    constructor(builder: TerraformCommandBuilder, outputFile: string) {
+        super(builder);
+        this.outputFile = outputFile;
+    }
+    async onRun(context: TerraformCommandContext): Promise<void>{
+        context.terraform.pipeExecOutputToTool(
+            tasks.tool(tasks.which("tee", true)).arg(this.outputFile),
+        )
+    }
+}
+
 export class TerraformRunner{
     private readonly terraform: ToolRunner;
     private readonly terraformPath: string;
@@ -226,6 +240,10 @@ export class TerraformRunner{
 
     withJsonOutput(): TerraformRunner{
         return this.with((builder) => new TerraformWithJsonOutput(builder));
+    }
+
+    withRawOutputToFile(outputFile: string): TerraformRunner{
+        return this.with((builder) => new TerraformRawOuputToFile(builder, outputFile));
     }
 
     private _processBuffers(buffers: Buffer[]): string {
