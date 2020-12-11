@@ -60,13 +60,13 @@ export class TerraformDisplayHandler implements IHandleCommandString{
 
     private async onExecute(command: TerraformDisplay): Promise<number> {
         let jsonCommand, plainCommand: IExecSyncResult
-        
+
         return Promise.all([
-            new TerraformRunner(command)              
+            new TerraformRunner(command)
                 .withShowOptions(command.inputTargetPlanFilePath, false)
                 .withSecureVarsFile(this.taskAgent, command.secureVarsFile)
                 .withRawOutputToFile("/Users/agoncharov/src/shura/azure-pipelines-tasks-terraform/TerraformDisplay/tfplan.txt")
-                .execWithOutput(),       
+                .execWithOutput(),
 
             new TerraformRunner(command)
                 .withShowOptions(command.inputTargetPlanFilePath, true)
@@ -82,7 +82,7 @@ export class TerraformDisplayHandler implements IHandleCommandString{
         }).catch((err) => {
             tasks.error("Failed to run `terraform show`: " + err)
             return -1
-        })        
+        })
     }
 
     private planTextToHtml(text: string): string {
@@ -103,7 +103,7 @@ export class TerraformDisplayHandler implements IHandleCommandString{
                 break
             case "update":
                 summary.toUpdate++
-                break                    
+                break
         }
         return summary
     }
@@ -130,9 +130,9 @@ export class TerraformDisplayHandler implements IHandleCommandString{
         }
 
         return summary
-      
+
     }
-    
+
     private getPlanSummary(planJson: string): string {
         const jsonResult = JSON.parse(planJson.replace(/(\r\n|\r|\n)/gm, ""));
         const r:Array<any> = jsonResult.resource_changes as Array<any>
@@ -146,5 +146,5 @@ export class TerraformDisplayHandler implements IHandleCommandString{
         tasks.debug("Calculated the following summary: " + JSON.stringify(summary))
         return JSON.stringify(summary)
     }
-
 }
+
