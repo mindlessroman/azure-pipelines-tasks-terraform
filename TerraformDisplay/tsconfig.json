@@ -5,6 +5,10 @@
     "sourceMap": true,
     "strict": true,
     "outDir": ".bin",
+    "baseUrl": "./",
+    "paths": {
+      "TerraformCLI/*": ["../TerraformCLI/src/*"]
+    },
     "typeRoots": [
       "node_modules/@types"
     ],

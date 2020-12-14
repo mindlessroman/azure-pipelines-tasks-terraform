@@ -1,12 +1,11 @@
-import tasks = require("azure-pipelines-task-lib/task");
-import { TerraformCommand, TerraformInterfaces, ITaskAgent, ILogger } from "./terraform";
-import { IHandleCommandString } from "./command-handler";
-import { injectable, inject } from "inversify";
-import { TerraformRunner, TerraformWithShow } from "./terraform-runner";
-import * as file from "fs";
-import { ResultDetails } from "azure-devops-node-api/interfaces/TestInterfaces";
-import { IExecSyncResult } from "azure-pipelines-task-lib/toolrunner";
-import { default as AnsiUp } from 'ansi_up';
+import AnsiUp from 'ansi_up';
+import tasks = require('azure-pipelines-task-lib/task');
+import { IExecSyncResult } from 'azure-pipelines-task-lib/toolrunner';
+import { inject, injectable } from 'inversify';
+import { IHandleCommandString } from 'TerraformCLI/command-handler';
+import { ILogger, ITaskAgent, TerraformCommand, TerraformInterfaces } from 'TerraformCLI/terraform';
+import { TerraformRunner } from 'TerraformCLI/terraform-runner';
+
 
 export class TerraformDisplay extends TerraformCommand{
    readonly inputTargetPlanFilePath: string |undefined;
