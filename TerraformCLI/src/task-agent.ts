@@ -11,8 +11,8 @@ export default class TaskAgent implements ITaskAgent {
     private readonly api: WebApi;
 
     constructor() {
-        const url: string = tasks.getVariable('System.TeamFoundationCollectionUri');
-        const credentials: string = tasks.getEndpointAuthorizationParameter('SYSTEMVSSCONNECTION', 'ACCESSTOKEN', false);
+        const url: string = tasks.getVariable('System.TeamFoundationCollectionUri') || ""; // TODO correct error handling
+        const credentials: string = tasks.getEndpointAuthorizationParameter('SYSTEMVSSCONNECTION', 'ACCESSTOKEN', false) || ""; // TODO correct error handling
         const authHandler = getPersonalAccessTokenHandler(credentials);
 
         const proxy = tasks.getHttpProxyConfiguration();
@@ -36,7 +36,7 @@ export default class TaskAgent implements ITaskAgent {
             if(!ticket){
                 throw new Error(`Download ticket for SecureFileId ${secureFileId} not found.`);
             }
-            const project:string = tasks.getVariable('SYSTEM.TEAMPROJECT');
+            const project:string = tasks.getVariable('SYSTEM.TEAMPROJECT') || ""; // TODO correct error handling
             const stream: NodeJS.WritableStream = (await agent.downloadSecureFile(project, secureFileId, ticket, false)).pipe(file);
             const deferred = Q.defer();
             stream.on('finish', () => { deferred.resolve(); });

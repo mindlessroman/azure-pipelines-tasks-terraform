@@ -115,7 +115,7 @@ export class TerraformWithSecureVarFile extends TerraformCommandDecorator{
         if(this.secureVarFileId){
             var secureFilePath = await this.taskAgent.downloadSecureFile(this.secureVarFileId);
             const fileName = tasks.getSecureFileName(this.secureVarFileId);
-            if(this.isEnvFile(fileName)) {
+            if(fileName && this.isEnvFile(fileName)) {
                 let config = dotenv.config({ path: secureFilePath }).parsed;
                 if ((!config) || (Object.keys(config).length === 0 && config.constructor === Object)) {
                     throw "The .env file doesn't have valid entries.";
