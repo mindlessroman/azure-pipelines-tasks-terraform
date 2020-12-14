@@ -17,7 +17,7 @@
     "files": [
         { "path": "TerraformCLI/.dist", "packagePath": "TerraformCLI" },
         { "path": "TerraformInstaller/.dist", "packagePath": "TerraformInstaller" },
-        { "path": "TerraformDisplay/.dist", "packagePath": "TerraformCLI" },
+        { "path": "TerraformDisplay/.dist", "packagePath": "TerraformDisplay" },
         { "path": "dist", "addressable": true}
     ],
     "repository" : {
