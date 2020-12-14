@@ -17,7 +17,7 @@ var container = new Container();
 container.bind<Container>("container").toConstantValue(container);
 container.bind<IMediator>(MediatorInterfaces.IMediator).to(Mediator);
 container.bind<ITaskAgent>(TerraformInterfaces.ITaskAgent).to(TaskAgent);
-container.bind<ILogger>(TerraformInterfaces.ILogger).toDynamicValue((context: interfaces.Context) => new Logger(tasks, ai.defaultClient));
+//container.bind<ILogger>(TerraformInterfaces.ILogger).toDynamicValue((context: interfaces.Context) => new Logger(tasks, ai.defaultClient));
 
 // bind the handlers for each terraform command
 container.bind<IHandleCommandString>(CommandInterfaces.IHandleCommandString).to(TerraformDisplayHandler).whenTargetNamed("show");
