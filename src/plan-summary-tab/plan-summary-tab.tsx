@@ -18,7 +18,7 @@ import { Observer  } from "azure-devops-ui/Observer";
 import * as SDK from "azure-devops-extension-sdk";
 import * as API from "azure-devops-extension-api";
 import {TaskAgentRestClient} from "azure-devops-extension-api/TaskAgent";
-import {BuildRestClient, IBuildPageDataService , BuildServiceIds} from "azure-devops-extension-api/Build";
+import {Timeline, Build, BuildRestClient, IBuildPageDataService , BuildServiceIds} from "azure-devops-extension-api/Build";
 import {CoreRestClient} from "azure-devops-extension-api/Core";
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 
@@ -43,7 +43,18 @@ import { examplePlan1 } from "./tfplan"
 import { RestClientBase } from "azure-devops-extension-api/Common/RestClientBase";
 import { ObservableValue, ObservableObject  } from "azure-devops-ui/Core/Observable";
 
+interface ThisBuild {
+    project: API.IProjectInfo,
+    buildId: number,
+    build: Build,
+    timeline: Timeline | void,
+}
+
 class TerraformPlanDisplay extends React.Component {
+
+    private readonly buildClient: BuildRestClient
+    private readonly timelineId: string = "6c731c3c-3c68-459a-a5c9-bde6e6595b5b" // this is the id of the task from task.json
+
     //private planContent = new ObservableValue<JSX.Element>(<Spinner label="OLOLO" size={SpinnerSize.large}/>)
     private planContent = new ObservableValue<string>("test")
     private planCo = new ObservableObject<JSX.Element>()
@@ -51,13 +62,23 @@ class TerraformPlanDisplay extends React.Component {
 
     constructor(props: {} | Readonly<{}>){
         super(props)
-        this.planCo.add("content", <Spinner key="ololo-spinner" label="OLOLO" size={SpinnerSize.large}/>)
+        this.buildClient = getClient(BuildRestClient)
     }
 
     public componentDidMount() {
         SDK.init();
         
-        this.renderPlainPlan();
+        this.getThisBuild()
+           .then((res) => {
+               return this.getPlainPlanAttachment(res.project.id, res.buildId, this.timelineId)
+            })
+            .then((res) => {
+                console.log("OK!")
+                this.planC.value = {__html: res}
+            })
+            .catch((err) => {
+                console.log(`Error: ${err}`)
+            })
     }
 
     public render(): JSX.Element {
@@ -89,146 +110,90 @@ class TerraformPlanDisplay extends React.Component {
         );
     }
 
-    private async renderPlainPlan(): Promise<void> {
-        /*
-        const projectService = SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService)
-            .then((res) => {
-                console.log("Got projectService")
-                return res
-            })
-            .catch((err) => {
-                console.log("Failed to get projectService")
-            })
-        */
+    private async getThisBuild(): Promise<ThisBuild> {
     
         const projectService =  await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService);
         const buildService = await SDK.getService<IBuildPageDataService>(BuildServiceIds.BuildPageDataService);
-        const p = await projectService.getProject();
-        const b = await buildService.getBuildPageData(); //requires await to work eventhough does not return Promise
+        const projectFromContext = await projectService.getProject();
+        const buildFromContext = await buildService.getBuildPageData(); //requires await to work eventhough does not return Promise
         
-        console.log("Username: "+ SDK.getUser().name)
-        console.log("Username: "+ SDK.getUser().id)
-        console.log("The token: " + await SDK.getAccessToken())
-        if (p) {
-            console.log("got project " + p.id + " " + p.name)
-            this.planC.value = {__html: p.name}
+        if (!projectFromContext || !buildFromContext ) {
+            console.log("No running in AzureDevops context.")
+            return new Promise<ThisBuild>((resolve, reject) => {
+                reject('Not running in AzureDevops context.')
+            }) 
         } else {
-            console.log("no project?")
-            return
+            console.log(`Running for project ${projectFromContext.id} and ${buildFromContext.build?.id.toString()}`)
         }
-        if (b && b.build) {           
-            console.log("got some build " + b.build?.id.toString())    
-        } else {
-            console.log("no build?")
-            return
-        }
+        const projectId = projectFromContext.id
 
-        const buildClient = getClient(BuildRestClient)
-        const build = await buildClient.getBuild(p.name, b.build.id)
-        if (!build) {
-            console.log("cannot get build")
-            return
+        if (!buildFromContext.build?.id) {
+            console.log("Cannot get build id.")
+            return new Promise<ThisBuild>((resolve, reject) => {
+                reject('Cannot get build from page data.')
+            })
         }
-        const timeline = await buildClient.getBuildTimeline(p.name, build.id)
-        if (!timeline) {
-            console.log("No timeline")
-            return
-        }
+        const buildId = buildFromContext.build.id
 
-        for (let i of timeline.records) {
-            console.log(i.name + ": task-" +i.task+" type-" +i.type+" id " + i.id + " att:" +i.attempt + "ididi: " + i.identifier)
-            
-        }
-        
-               
-        const attach = await buildClient.getAttachment(p.id, build.id, "6c731c3c-3c68-459a-a5c9-bde6e6595b5b", "be7c4c18-daf2-5379-a4ad-97bf6adfd74a", "textplan", "tfplan.txt")
-        const td = new TextDecoder()
-        console.log(td.decode(attach))
-        const ansi_up = new AnsiUp();
-        const plan = "<pre>" + ansi_up.ansi_to_html(td.decode(attach)) + "</pre>"
-        this.planC.value = {__html: plan}
+        var build: Build
+        var timeline: Timeline
 
-
-        /*
-        let project: IProjectInfo
-
-        Promise.all([
-           
-           
-        ]).then((res) => {
-            console.log("Got all services")
-            return res
-            
-        }).catch((err) => {
-            console.log("Could not build services " + err)
-        })
-        console.log("timeout in")
-        setTimeout(() => {
-            
-            this.planContent.value = "something else"
-            this.planCo.add("content", <h1>whee</h1>)
-            this.planC.value = {__html: "whoop whoop"}
-            console.log("look ma, no hands!")
-        }, 3000);     
-        console.log("timeout out")
-        */
-
-        /*
-        .then((res) => { 
-            const p = projectService.getProject()
-            if (p) {
-                return p
-            } else {
-                return new Promise<string>((resolve, reject) => { reject("Looks like this is not running as part of the devops.") })
-            }
-            project = res })
-        .catch()
-    /*
-        const projectService =  await SDK.getService<IProjectPageService>(CommonServiceIds.ProjectPageService);
-        const project =  await projectService.getProject()
-        if (! project) {
-            return <span> cant get project </span>
-        }
-        
-        const buildService = await SDK.getService<IBuildPageDataService>(BuildServiceIds.BuildPageDataService);
-        const build = buildService.getBuildPageData();
-        //const t = buildService.get
-        if (!build?.build) {
-            return "cant get build"
-        }
-        //const buildClient = getClient(BuildRestClient)
-        //buildClient.getAttachment(project.id!, build.build.id, "timelineid", "recordid", "textplan", "tfplan.txt")
-        
-        //const o: API.IVssRestClientOptions = {}
-        //const t: API.RestClientFactory<TaskAgentRestClient> = 
-        */
+        return this.buildClient.getBuild(projectFromContext.name, buildId)
+            .then((res) => {
+                build = res
+                return this.buildClient.getBuildTimeline(projectFromContext.name, buildId)
+            })
+            .then((res) => {               
+                return new Promise<ThisBuild>((resolve, reject) => {
+                    resolve({
+                        project: projectFromContext,
+                        buildId: buildId,
+                        build: build,
+                        timeline: res
+                    })
+                } )
+            })
+            .catch((err) => {
+                console.log(`Failed to get build or timeline from API: ${err}`)
+                return new Promise<ThisBuild> ((resolve, reject) => {reject(`Failed to get build or timeline from API: ${err}`)})
+            })
     }
 
-}
-
-function renderPlan() : JSX.Element {
-
-    const ansi_up = new AnsiUp();
-
-    var res = [];
-    var lines = examplePlan1.split('\n');
-    var plan = ansi_up.ansi_to_html(examplePlan1)
     /*
-    for(var i = 0;i < lines.length;i++){
-        var line = ansi_up.ansi_to_html(lines[i])
-        const thing = (
-            <span dangerouslySetInnerHTML={{__html: line}}></span>
-            )
-        res.push(thing)
+    getJsonSummaryAttachment(projectId: string, buildId: number, timelineId: string): Promise<string> {
+            const attachmentType: string = "jsonplan"
+            const filename: string = "tfplan.txt"
+            const recordId = "be7c4c18-daf2-5379-a4ad-97bf6adfd74a" // TODO how to discover?
+            
+            return this.buildClient.getAttachment(projectId, buildId, timelineId, recordId, attachmentType, filename)
+            .then((res) => {
+                const td = new TextDecoder()
+                const ansi_up = new AnsiUp();
+                return "<pre>" + ansi_up.ansi_to_html(td.decode(res)) + "</pre>"
+            })
+            .catch((err) => {
+                console.log(`Failed to download plai plan: ${err}`)
+                return new Promise<string>((resolve, reject) => {reject(`Failed to download plain plan: ${err}`)})
+            })            
     }
     */
-   return (<pre dangerouslySetInnerHTML={{__html: plan}}/>)
-    //return (<pre className="flex-grow flex-column"> {res} </pre>)
-    //return <code> {examplePlan1} </code>
-    // return (<span className="flex-row"> testotest </span>)
-    //return ansi_up.ansi_to_html(examplePlan1)
-    // dangerouslySetInnerHTML={{__html: line}}
-}
 
+    getPlainPlanAttachment(projectId: string, buildId: number, timelineId: string): Promise<string> {
+        const attachmentType: string = "jsonplan"
+        const filename: string = "tfplan.json"
+        const recordId = "be7c4c18-daf2-5379-a4ad-97bf6adfd74a" // TODO how to discover?
+
+        return this.buildClient.getAttachment(projectId, buildId, timelineId, recordId, attachmentType, filename)
+            .then((res) => {
+                const td = new TextDecoder()
+                const ansi_up = new AnsiUp();
+                return "<pre>" + ansi_up.ansi_to_html(td.decode(res)) + "</pre>"
+            })
+            .catch((err) => {
+                console.log(`Failed to download plai plan: ${err}`)
+                return new Promise<string>((resolve, reject) => {reject(`Failed to download plain plan: ${err}`)})
+            })
+    }
+}
 
 ReactDOM.render(<TerraformPlanDisplay />, document.getElementById("root"));

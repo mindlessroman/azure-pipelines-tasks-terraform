@@ -8,7 +8,6 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "target": "es6",
-    "rootDir": "src/",
     "outDir": "dist/",
     "jsx": "react",
     "lib": ["es6", "dom"],
@@ -18,6 +17,7 @@
       "node_modules",
       "typings",
       "TerraformCLI",
+      "TerraformDisplay",
       "TerraformInstaller"
   ]
 }
