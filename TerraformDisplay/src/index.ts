@@ -1,15 +1,15 @@
 import tasks = require("azure-pipelines-task-lib/task");
-import { Container, interfaces } from 'inversify';
+import { Container } from 'inversify';
 import "reflect-metadata";
-import { TerraformInterfaces, ITaskAgent, ILogger } from "TerraformCLI/terraform";
+import { CommandInterfaces, IHandleCommandString } from "./command-handler";
+import { IMediator, Mediator, MediatorInterfaces } from "./mediator";
+import TaskAgent from "./task-agent";
+import { ITaskAgent, TerraformInterfaces } from "./terraform";
+import { TerraformAggregateError } from "./terraform-aggregate-error";
 import { TerraformDisplayHandler } from "./terraform-display";
-import TaskAgent from "TerraformCLI/task-agent";
-import { MediatorInterfaces, IMediator, Mediator } from "TerraformCLI/mediator";
-import { IHandleCommandString, CommandInterfaces, IHandleCommand } from "TerraformCLI/command-handler";
-import Logger from "TerraformCLI/logger";
+//import Logger from "TerraformCLI/logger";
 
 import ai = require('applicationinsights');
-import { TerraformAggregateError } from "TerraformCLI/terraform-aggregate-error";
 
 var container = new Container();
 

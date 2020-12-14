@@ -1,10 +1,10 @@
 import AnsiUp from 'ansi_up';
-import tasks = require('azure-pipelines-task-lib/task');
 import { IExecSyncResult } from 'azure-pipelines-task-lib/toolrunner';
 import { inject, injectable } from 'inversify';
-import { IHandleCommandString } from 'TerraformCLI/command-handler';
-import { ILogger, ITaskAgent, TerraformCommand, TerraformInterfaces } from 'TerraformCLI/terraform';
-import { TerraformRunner } from 'TerraformCLI/terraform-runner';
+import { IHandleCommandString } from './command-handler';
+import { ILogger, ITaskAgent, TerraformCommand, TerraformInterfaces } from './terraform';
+import { TerraformRunner } from './terraform-runner';
+import tasks = require('azure-pipelines-task-lib/task');
 
 
 export class TerraformDisplay extends TerraformCommand{
