@@ -86,6 +86,16 @@
             }
         },
         {
+            "id": "azure-pipelines-tasks-terraform-display",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "TerraformDisplay"
+            }
+        },
+        {
             "description": "A tab to dump terraform plan output to.",
             "id": "terraform-plan-tab",
             "type": "ms.vss-build-web.build-results-tab",
