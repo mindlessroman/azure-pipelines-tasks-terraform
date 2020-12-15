@@ -13,7 +13,6 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import "./plan-summary-tab.scss";
 import {
-    fixedColumns,
     ITableItem,
     renderAdd,
     renderChange,
@@ -140,7 +139,7 @@ class TerraformPlanDisplay extends React.Component {
 
                     <Table
                         ariaLabel="Basic Table"
-                        columns={fixedColumns}
+                        columns={this.fixedColumns}
                         itemProvider={this.tableItemProvider}
                         role="table"
                         className="tf-plan-summary"

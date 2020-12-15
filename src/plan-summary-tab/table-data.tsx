@@ -1,10 +1,7 @@
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
 import { ISimpleListCell } from "azure-devops-ui/List";
 import { IStatusProps, Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import {
-    ISimpleTableCell,
-    renderSimpleCell,
-    TableColumnLayout
+    ISimpleTableCell
 } from "azure-devops-ui/Table";
 import { css } from "azure-devops-ui/Util";
 import * as React from "react";
@@ -16,39 +13,10 @@ export interface ITableItem extends ISimpleTableCell {
     outputs: number;
 }
 
-export const fixedColumns = [
-    {
-        columnLayout: TableColumnLayout.singleLine,
-        id: "action",
-        name: "Action",
-        readonly: true,
-        renderCell: renderSimpleCell,
-        width: new ObservableValue(-30),
-    },
-    {
-        columnLayout: TableColumnLayout.singleLine,
-        id: "resources",
-        name: "Resources",
-        readonly: true,
-        renderCell: renderSimpleCell,
-        width: new ObservableValue(-30),
-    },
-
-    {
-        columnLayout: TableColumnLayout.singleLine,
-        id: "outputs",
-        name: "Outputs",
-        readonly: true,
-        renderCell: renderSimpleCell,
-        width: new ObservableValue(-30),
-    },
-];
-
 interface IconSelector {
     statusProps: IStatusProps;
     label: string;
 }
-
 
 export const renderNoChange = (className?: string) => {
     return (
@@ -93,26 +61,3 @@ export const renderDestroy = (className?: string) => {
         />
     );
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
