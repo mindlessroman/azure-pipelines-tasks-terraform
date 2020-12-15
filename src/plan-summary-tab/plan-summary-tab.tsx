@@ -104,12 +104,12 @@ class TerraformPlanDisplay extends React.Component {
 
                 this.tableItemProvider.change(0,
                     {
-                        action: { iconProps: { render: renderDestroy }, text: "To delete" },
+                        action: { iconProps: { render: renderDestroy }, text: "To destroy" },
                         resources: summary.resources.toDelete,
                         outputs: summary.outputs.toDelete
                     },
                     {
-                        action: { iconProps: { render: renderChange }, text: "To updage" },
+                        action: { iconProps: { render: renderChange }, text: "To update" },
                         resources: summary.resources.toUpdate,
                         outputs: summary.outputs.toUpdate
                     },
