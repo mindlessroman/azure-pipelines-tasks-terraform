@@ -1,4 +1,3 @@
-import AnsiUp from 'ansi_up';
 import { IExecSyncResult } from 'azure-pipelines-task-lib/toolrunner';
 import { inject, injectable } from 'inversify';
 import { IHandleCommandString } from './command-handler';
@@ -6,32 +5,58 @@ import { ILogger, ITaskAgent, TerraformCommand, TerraformInterfaces } from './te
 import { TerraformRunner } from './terraform-runner';
 import tasks = require('azure-pipelines-task-lib/task');
 
+interface TerrafromDisplayAttachment {
+    type: string
+    sourceFile: string
+    attachmentName: string
+}
 
-export class TerraformDisplay extends TerraformCommand{
-   readonly inputTargetPlanFilePath: string |undefined;
-   readonly secureVarsFile: string | undefined;
+export class TerraformDisplay extends TerraformCommand {
+    readonly inputTargetPlanFilePath: string | undefined;
+    readonly secureVarsFile: string | undefined;
+
+    readonly plainPlan: TerrafromDisplayAttachment
+    readonly planSummary: TerrafromDisplayAttachment
 
     constructor(
-        name: string,
-        workingDirectory: string,
-        inputTargetPlanFilePath: string,
-        secureVarsFile?: string){
-        super(name, workingDirectory, undefined, true);
+        workingDirectory: string = "./",
+        inputTargetPlanFilePath: string = "tfplan",
+        secureVarsFile?: string) {
 
-        this.inputTargetPlanFilePath = inputTargetPlanFilePath;
+        super("show", tasks.resolve(workingDirectory), undefined, true);
+
+        this.inputTargetPlanFilePath = tasks.resolve(this.workingDirectory, inputTargetPlanFilePath);
         this.secureVarsFile = secureVarsFile;
+
+        this.plainPlan = {
+            type: "plan.text",
+            sourceFile: tasks.resolve(this.workingDirectory, "tfplan.txt"),
+            attachmentName: "tfplan.txt"
+        }
+
+        this.planSummary = {
+            type: "summary.json",
+            sourceFile: tasks.resolve(this.workingDirectory, "summary.json"),
+            attachmentName: "summary.json"
+        }
     }
 }
 
-interface PlanSummary {
+interface TypeSummary {
     toCreate: number
     toDelete: number
     toUpdate: number
     unchanged: number
 }
 
+interface PlanSummary {
+    resources: TypeSummary
+    outputs: TypeSummary
+}
+
+
 @injectable()
-export class TerraformDisplayHandler implements IHandleCommandString{
+export class TerraformDisplayHandler implements IHandleCommandString {
     private readonly log: ILogger;
     private readonly taskAgent: ITaskAgent;
 
@@ -45,9 +70,8 @@ export class TerraformDisplayHandler implements IHandleCommandString{
 
     public async execute(command: string): Promise<number> {
         let showJson = new TerraformDisplay(
-            "show",
-            tasks.getInput("workingDirectory") || "./",
-            tasks.getInput("inputTargetPlanFilePath") || "tfplan",
+            tasks.getInput("workingDirectory"),
+            tasks.getInput("inputTargetPlanFilePath"),
             tasks.getInput("secureVarsFile")
         );
 
@@ -65,7 +89,7 @@ export class TerraformDisplayHandler implements IHandleCommandString{
             new TerraformRunner(command)
                 .withShowOptions(command.inputTargetPlanFilePath, false)
                 .withSecureVarsFile(this.taskAgent, command.secureVarsFile)
-                .withRawOutputToFile("/Users/agoncharov/src/shura/azure-pipelines-tasks-terraform/TerraformDisplay/tfplan.txt")
+                .withRawOutputToFile(command.plainPlan.sourceFile)
                 .execWithOutput(),
 
             new TerraformRunner(command)
@@ -74,10 +98,18 @@ export class TerraformDisplayHandler implements IHandleCommandString{
                 .execWithOutput(),
 
         ]).then((res) => {
+
             [plainCommand, jsonCommand] = res
-            tasks.addAttachment("plan.text", "tfplan.html", "tfplan.txt")
-            tasks.writeFile("plan-summary.json", this.getPlanSummary(jsonCommand.stdout))
-            tasks.addAttachment("plan.summary", "plan-summary.json", "plan-summary.json")
+
+            const ps = this.getPlanSummary(jsonCommand.stdout)
+
+            this.produceWarnings(ps)
+
+            tasks.writeFile(command.planSummary.sourceFile, JSON.stringify(ps))
+
+            tasks.addAttachment(command.planSummary.type, command.planSummary.attachmentName, command.planSummary.sourceFile)
+            tasks.addAttachment(command.plainPlan.type, command.plainPlan.attachmentName, command.plainPlan.sourceFile)
+
             return jsonCommand.code
         }).catch((err) => {
             tasks.error("Failed to run `terraform show`: " + err)
@@ -85,12 +117,7 @@ export class TerraformDisplayHandler implements IHandleCommandString{
         })
     }
 
-    private planTextToHtml(text: string): string {
-        const ansi_up = new AnsiUp();
-        return "<pre>\n" + ansi_up.ansi_to_html(text) + "\n</pre>\n"
-    }
-
-    private updateSummary(action: string, summary: PlanSummary): PlanSummary {
+    private updateSummary(action: string, summary: TypeSummary): TypeSummary {
         switch (action) {
             case "no-op":
                 summary.unchanged++
@@ -109,7 +136,7 @@ export class TerraformDisplayHandler implements IHandleCommandString{
     }
 
     private getChanges(items: Array<any>, fetchActions: (obj: any) => Array<string>) {
-        let summary: PlanSummary = {
+        let summary: TypeSummary = {
             toCreate: 0,
             toDelete: 0,
             toUpdate: 0,
@@ -124,7 +151,7 @@ export class TerraformDisplayHandler implements IHandleCommandString{
                     summary = this.updateSummary(action, summary)
                 }
             } else {
-                tasks.warning("Got empty actions array. It is possible that plan json schema is different.")
+                tasks.debug("Got empty actions array. It is possible that plan json schema is different.")
                 errors = true
             }
         }
@@ -133,18 +160,31 @@ export class TerraformDisplayHandler implements IHandleCommandString{
 
     }
 
-    private getPlanSummary(planJson: string): string {
-        const jsonResult = JSON.parse(planJson.replace(/(\r\n|\r|\n)/gm, ""));
-        const r:Array<any> = jsonResult.resource_changes as Array<any>
-        const o:Array<any> = Object.values(jsonResult.output_changes)
+    private produceWarnings(s: PlanSummary): void {
+        if (s.outputs.toDelete + s.resources.toDelete > 0) {
+            tasks.warning(`This plan is going to destroy ${s.resources.toDelete} resources and ${s.outputs.toDelete} ouputs.`)
+        }
+        if (s.outputs.toUpdate + s.resources.toUpdate > 0) {
+            tasks.warning(`This plan is going to update ${s.resources.toUpdate} resources and ${s.outputs.toUpdate} outputs.`)
+        }
+        if (s.outputs.toCreate + s.resources.toCreate > 0) {
+            tasks.warning(`This plan is going to create ${s.resources.toCreate} resources and ${s.outputs.toCreate} outputs.`)
+        }
+    }
 
-        const summary = {
-            resources: this.getChanges(r, (resource: any) => { return resource.change.actions || []}),
-            outputs:   this.getChanges(r, (resource: any) => { return resource.actions        || []}),
+    private getPlanSummary(planJson: string): PlanSummary {
+        const jsonResult = JSON.parse(planJson.replace(/(\r\n|\r|\n)/gm, ""));
+        const resources: Array<any> = jsonResult.resource_changes as Array<any>
+        const outputs: Array<any> = Object.keys(jsonResult.output_changes).map((key) => { return jsonResult.output_changes[key] })
+
+
+        const summary: PlanSummary = {
+            resources: this.getChanges(resources, (resource: any) => { return resource.change.actions || [] }),
+            outputs: this.getChanges(outputs, (resource: any) => { return resource.actions || [] }),
         }
 
         tasks.debug("Calculated the following summary: " + JSON.stringify(summary))
-        return JSON.stringify(summary)
+        return summary
     }
 }
 

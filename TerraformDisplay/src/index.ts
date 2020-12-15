@@ -1,13 +1,13 @@
 import tasks = require("azure-pipelines-task-lib/task");
-import { Container } from 'inversify';
+import { Container, interfaces } from 'inversify';
 import "reflect-metadata";
 import { CommandInterfaces, IHandleCommandString } from "./command-handler";
+import Logger from "./logger";
 import { IMediator, Mediator, MediatorInterfaces } from "./mediator";
 import TaskAgent from "./task-agent";
-import { ITaskAgent, TerraformInterfaces } from "./terraform";
+import { ILogger, ITaskAgent, TerraformInterfaces } from "./terraform";
 import { TerraformAggregateError } from "./terraform-aggregate-error";
 import { TerraformDisplayHandler } from "./terraform-display";
-//import Logger from "TerraformCLI/logger";
 
 import ai = require('applicationinsights');
 
@@ -17,7 +17,7 @@ var container = new Container();
 container.bind<Container>("container").toConstantValue(container);
 container.bind<IMediator>(MediatorInterfaces.IMediator).to(Mediator);
 container.bind<ITaskAgent>(TerraformInterfaces.ITaskAgent).to(TaskAgent);
-//container.bind<ILogger>(TerraformInterfaces.ILogger).toDynamicValue((context: interfaces.Context) => new Logger(tasks, ai.defaultClient));
+container.bind<ILogger>(TerraformInterfaces.ILogger).toDynamicValue((context: interfaces.Context) => new Logger(tasks, ai.defaultClient));
 
 // bind the handlers for each terraform command
 container.bind<IHandleCommandString>(CommandInterfaces.IHandleCommandString).to(TerraformDisplayHandler).whenTargetNamed("show");
@@ -27,7 +27,7 @@ let mediator = container.get<IMediator>(MediatorInterfaces.IMediator);
 let foo = process.env;
 const lastExitCodeVariableName = "TERRAFORM_LAST_EXITCODE";
 //mediator.executeRawString("version")
-    //.then(() => 
+    //.then(() =>
     mediator.executeRawString("show")
     .then((exitCode) => {
         tasks.setVariable(lastExitCodeVariableName, exitCode.toString(), false);
