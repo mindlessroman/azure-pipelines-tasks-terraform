@@ -4,9 +4,8 @@
   "description": "Azure devops pipeline task to install terraform",
   "main": ".bin/index.js",
   "scripts": {
-    "clean": "rimraf ./.bin ./.dist",
-    "build": "npm run clean && ./node_modules/.bin/tsc --build",
-    "pack": "npm run build && ./node_modules/.bin/copyfiles package.json task.json icon.png \".bin/*.js\" -e \".bin/tests/*\" .dist && cd .dist && npm install --only=prod",
+    "build": "tsc --build",
+    "pack": "./node_modules/.bin/copyfiles package.json task.json icon.png \".bin/*.js\" -e \".bin/tests/*\" .dist && cd .dist && npm install --only=prod",
     "delete": "./node_modules/.bin/tfx build tasks delete --task-id 11645770-d18e-11e8-8f5b-1b8b62612b3b",
     "upload": "./node_modules/.bin/tfx build tasks upload --task-path .dist",
     "start": "node --require dotenv/config .bin/index.js",
