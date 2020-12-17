@@ -5,13 +5,13 @@
   "main": ".bin/index.js",
   "scripts": {
     "clean": "rimraf ./.bin ./.dist",
-    "build": "npm run clean && tsc --build && cpx \"src/tests/**/*.{env,vars}\" \".bin/tests\"",
-    "pack": "npm run build && ./node_modules/.bin/copyfiles package.json task.json icon.png \".bin/*.js\" -e \".bin/tests/*\" .dist && cd .dist && npm install --only=prod",
-    "delete": "tfx build tasks delete --task-id 320ec1e4-3b96-11eb-adc1-0242ac120002",
-    "upload": "tfx build tasks upload --task-path .dist",
+    "build": "npx tsc --build && cpx \"src/tests/**/*.{env,vars}\" \".bin/tests\"",
+    "pack": "npx copyfiles package.json task.json icon.png \".bin/*.js\" -e \".bin/tests/*\" .dist && cd .dist && npm install --only=prod",
+    "delete": "npx tfx build tasks delete --task-id 320ec1e4-3b96-11eb-adc1-0242ac120002",
+    "upload": "npx tfx build tasks upload --task-path .dist",
     "start": "node --require dotenv/config .bin/index.js",
-    "test": "./node_modules/.bin/nyc -r cobertura -r html \"./node_modules/.bin/mocha\" \".bin/tests/**/*_spec.js\" --timeout 999999 --reporter mocha-junit-reporter --reporter-options \"mochaFile=./.test-output/terraform-cli.xml\"",
-    "test:local": "./node_modules/.bin/mocha \".bin/tests/**/*_spec.js\" --timeout 999999"
+    "test": "npx nyc -r cobertura -r html \"./node_modules/.bin/mocha\" \".bin/tests/**/*_spec.js\" --timeout 999999 --reporter mocha-junit-reporter --reporter-options \"mochaFile=./.test-output/terraform-cli.xml\"",
+    "test:local": "npx mocha \".bin/tests/**/*_spec.js\" --timeout 999999"
   },
   "repository": {
     "type": "git",
@@ -38,7 +38,8 @@
     "mocha": "^7.1.2",
     "mocha-junit-reporter": "^1.18.0",
     "nyc": "^15.0.0",
-    "tfx-cli": "^0.6.4"
+    "tfx-cli": "^0.6.4",
+    "typescript": "^4.1.3"
   },
   "dependencies": {
     "applicationinsights": "^1.4.0",
