@@ -1,45 +1,14 @@
-import { IExecSyncResult } from 'azure-pipelines-task-lib/toolrunner';
-import { inject, injectable } from 'inversify';
-import { IHandleCommandString } from './command-handler';
-import { ILogger, ITaskAgent, TerraformCommand, TerraformInterfaces } from './terraform';
-import { TerraformRunner } from './terraform-runner';
 import tasks = require('azure-pipelines-task-lib/task');
+import { IExecOptions, ToolRunner } from 'azure-pipelines-task-lib/toolrunner';
+import * as dotenv from "dotenv";
+import { createWriteStream } from 'fs';
+import TaskAgent from './task-agent';
+
 
 interface TerrafromDisplayAttachment {
     type: string
     sourceFile: string
     attachmentName: string
-}
-
-export class TerraformDisplay extends TerraformCommand {
-    readonly inputTargetPlanFilePath: string | undefined;
-    readonly secureVarsFile: string | undefined;
-
-    readonly plainPlan: TerrafromDisplayAttachment
-    readonly planSummary: TerrafromDisplayAttachment
-
-    constructor(
-        workingDirectory: string = "./",
-        inputTargetPlanFilePath: string = "tfplan",
-        secureVarsFile?: string) {
-
-        super("show", tasks.resolve(workingDirectory), undefined, true);
-
-        this.inputTargetPlanFilePath = tasks.resolve(this.workingDirectory, inputTargetPlanFilePath);
-        this.secureVarsFile = secureVarsFile;
-
-        this.plainPlan = {
-            type: "plan.text",
-            sourceFile: tasks.resolve(this.workingDirectory, "tfplan.txt"),
-            attachmentName: "tfplan.txt"
-        }
-
-        this.planSummary = {
-            type: "summary.json",
-            sourceFile: tasks.resolve(this.workingDirectory, "summary.json"),
-            attachmentName: "summary.json"
-        }
-    }
 }
 
 interface TypeSummary {
@@ -54,67 +23,215 @@ interface PlanSummary {
     outputs: TypeSummary
 }
 
+export class TerraformDisplay {
 
-@injectable()
-export class TerraformDisplayHandler implements IHandleCommandString {
-    private readonly log: ILogger;
-    private readonly taskAgent: ITaskAgent;
+    protected readonly tool: ToolRunner
+    protected readonly planFilePath: string;
+    protected secureVarsFile: string | undefined;
+    protected readonly workingDirectory: string
+    protected stdout: Buffer[] = [];
+    protected stderr: Buffer[] = [];
+    protected taskAgent: TaskAgent
+    protected execOptions: IExecOptions
+    protected args: string[] = []
 
     constructor(
-        @inject(TerraformInterfaces.ITaskAgent) taskAgent: ITaskAgent,
-        @inject(TerraformInterfaces.ILogger) log: ILogger
+        workingDirectory: string = "./",
+        planFilePath: string = "tfplan",
+        silent: boolean = false,
+        secureVarsFile?: string,
     ) {
-        this.log = log;
-        this.taskAgent = taskAgent;
-    }
 
-    public async execute(command: string): Promise<number> {
-        let showJson = new TerraformDisplay(
-            tasks.getInput("workingDirectory"),
-            tasks.getInput("inputTargetPlanFilePath"),
-            tasks.getInput("secureVarsFile")
-        );
+        this.workingDirectory = tasks.resolve(workingDirectory)
+        this.planFilePath = tasks.resolve(this.workingDirectory, planFilePath);
 
-        let loggedProps = {
-            "secureVarsFileDefined": showJson.secureVarsFile !== undefined && showJson.secureVarsFile !== '' && showJson.secureVarsFile !== null,
+        this.tool = new ToolRunner('terraform').arg('show')
+        
+        this.tool.on("stdout", (data: Buffer) => {
+            this.stdout.push(data);
+        });
+        this.tool.on("stderr", (data: Buffer) => {
+            this.stderr.push(data);
+        });
+
+        this.execOptions = {
+            failOnStdErr: false,
+            ignoreReturnCode: false,
+            cwd: this.workingDirectory,
+            silent: true,
         }
-        return this.log.command(showJson, (command: TerraformDisplay) => this.onExecute(command), loggedProps);
+
+        this.taskAgent = new TaskAgent()
+
+        if (secureVarsFile) {
+            this.taskAgent.downloadSecureFile(secureVarsFile)
+                .then((res) => {
+                    this.secureVarsFile = res
+                })
+                .catch((err) => {
+                    throw new Error(`Failed to download secure vars file ${err}`)
+                })
+        }
     }
 
+    public async execute(): Promise<number> {
+        return this.run()
+    }
 
-    private async onExecute(command: TerraformDisplay): Promise<number> {
-        let jsonCommand, plainCommand: IExecSyncResult
+    protected arg(arg: string): TerraformDisplay{
+        this.tool.arg(arg)
+        this.args.push(arg)
+        return this
+    }
 
-        return Promise.all([
-            new TerraformRunner(command)
-                .withShowOptions(command.inputTargetPlanFilePath, false)
-                .withSecureVarsFile(this.taskAgent, command.secureVarsFile)
-                .withRawOutputToFile(command.plainPlan.sourceFile)
-                .execWithOutput(),
+    protected run(): Promise<number> {
+        
+        this.arg(this.planFilePath)
 
-            new TerraformRunner(command)
-                .withShowOptions(command.inputTargetPlanFilePath, true)
-                .withSecureVarsFile(this.taskAgent, command.secureVarsFile)
-                .execWithOutput(),
+        if (this.secureVarsFile) {
+            const config = dotenv.config({ path: this.secureVarsFile }).parsed;
+            if ((!config) || (Object.keys(config).length === 0 && config.constructor === Object)) {
+                throw "The .env file doesn't have valid entries.";
+            }
+        }
 
-        ]).then((res) => {
-
-            [plainCommand, jsonCommand] = res
-
-            const ps = this.getPlanSummary(jsonCommand.stdout)
-
-            this.produceWarnings(ps)
-
-            tasks.writeFile(command.planSummary.sourceFile, JSON.stringify(ps))
-
-            tasks.addAttachment(command.planSummary.type, command.planSummary.attachmentName, command.planSummary.sourceFile)
-            tasks.addAttachment(command.plainPlan.type, command.plainPlan.attachmentName, command.plainPlan.sourceFile)
-
-            return jsonCommand.code
-        }).catch((err) => {
-            tasks.error("Failed to run `terraform show`: " + err)
-            return -1
+        tasks.debug(`Running terraform ${this.args.join(" ")}`)
+        return new Promise<number>((resolve, reject) => {
+            this.tool.exec(this.execOptions)
+            .then((code) => {
+                if (code > 0) {
+                    tasks.error(`Failed to run terraform show ${this.args.join(" ")}: ${this.buffersToString(this.stderr)}`)
+                    reject(code)
+                }
+                tasks.debug(`Completed terraform show ${this.args.join(" ")}`)
+                resolve(code)
+            })
+            .catch((err) => {
+                const e = (`Failed to run terraform show ${this.args.join(" ")} : ${err}`)
+                tasks.error(e)
+                throw new Error(e)
+            })
         })
+    }
+
+    protected buffersToString(buffers: Buffer[]): string {
+        return buffers
+            .map(data => {
+                return data.toString()
+            })
+            .join('')
+    }
+
+    protected decodeBuffers(buffers: Buffer[]): string {
+
+        const td = new TextDecoder
+        return buffers
+            .map(data => {
+                return td.decode(data)
+            })
+            .join('')
+    }
+
+}
+
+export class TerraformDisplayPlainPlan extends TerraformDisplay {
+
+    private attachment: TerrafromDisplayAttachment
+
+    constructor(
+        workingDirectory: string = "./",
+        planFilePath: string = "tfplan",
+        secureVarsFile?: string
+    ) {
+        super(
+            workingDirectory,
+            planFilePath,
+            false,
+            secureVarsFile
+        )
+
+        this.attachment = {
+            type: "plan.text",
+            sourceFile: tasks.resolve(this.workingDirectory, "tfplan.txt"),
+            attachmentName: "tfplan.txt"
+        }
+
+        this.execOptions.silent = false
+
+        this.execOptions.outStream = createWriteStream(this.attachment.sourceFile)
+    }
+
+    public async execute(): Promise<number> {
+
+        this.tool.pipeExecOutputToTool(
+            tasks.tool("tee").arg(this.attachment.sourceFile),
+        )
+
+        return this.run()
+            .then((code) => {
+                tasks.addAttachment(this.attachment.type, this.attachment.attachmentName, this.attachment.sourceFile)
+                return code
+            })
+            .catch((err) => {
+                throw new Error(err)
+            })
+    }
+}
+
+export class TerraformDisplayJsonPlan extends TerraformDisplay {
+    private readonly produceWarningsAtSummary: boolean = true
+
+    private attachment: TerrafromDisplayAttachment
+
+    constructor(
+        workingDirectory: string = "./",
+        planFilePath: string = "tfplan",
+        secureVarsFile?: string
+    ) {
+        super(
+            workingDirectory,
+            planFilePath,
+            false,
+            secureVarsFile
+        )
+
+        this.arg("-json")
+        this.arg("-no-color")
+
+        this.attachment = {
+            type: "summary.json",
+            sourceFile: tasks.resolve(this.workingDirectory, "summary.json"),
+            attachmentName: "summary.json"
+        }
+    }
+
+    public async execute(): Promise<number> {
+
+        return this.run()
+            .then((code) => {
+                const summary = this.getPlanSummary(this.buffersToString(this.stdout))
+                if (this.produceWarningsAtSummary) { this.produceWarnings(summary) }
+    
+                tasks.writeFile(this.attachment.sourceFile, JSON.stringify(summary))
+                tasks.addAttachment(this.attachment.type, this.attachment.attachmentName, this.attachment.sourceFile)
+    
+                return code
+            })
+            .catch((err) => {
+                throw new Error(err)
+            })
+    }
+
+    private produceWarnings(s: PlanSummary): void {
+        if (s.outputs.toDelete + s.resources.toDelete > 0) {
+            tasks.warning(`This plan is going to destroy ${s.resources.toDelete} resources and ${s.outputs.toDelete} ouputs.`)
+        }
+        if (s.outputs.toUpdate + s.resources.toUpdate > 0) {
+            tasks.warning(`This plan is going to update ${s.resources.toUpdate} resources and ${s.outputs.toUpdate} outputs.`)
+        }
+        if (s.outputs.toCreate + s.resources.toCreate > 0) {
+            tasks.warning(`This plan is going to create ${s.resources.toCreate} resources and ${s.outputs.toCreate} outputs.`)
+        }
     }
 
     private updateSummary(action: string, summary: TypeSummary): TypeSummary {
@@ -160,18 +277,6 @@ export class TerraformDisplayHandler implements IHandleCommandString {
 
     }
 
-    private produceWarnings(s: PlanSummary): void {
-        if (s.outputs.toDelete + s.resources.toDelete > 0) {
-            tasks.warning(`This plan is going to destroy ${s.resources.toDelete} resources and ${s.outputs.toDelete} ouputs.`)
-        }
-        if (s.outputs.toUpdate + s.resources.toUpdate > 0) {
-            tasks.warning(`This plan is going to update ${s.resources.toUpdate} resources and ${s.outputs.toUpdate} outputs.`)
-        }
-        if (s.outputs.toCreate + s.resources.toCreate > 0) {
-            tasks.warning(`This plan is going to create ${s.resources.toCreate} resources and ${s.outputs.toCreate} outputs.`)
-        }
-    }
-
     private getPlanSummary(planJson: string): PlanSummary {
         const jsonResult = JSON.parse(planJson.replace(/(\r\n|\r|\n)/gm, ""));
         const resources: Array<any> = jsonResult.resource_changes as Array<any>
@@ -187,4 +292,3 @@ export class TerraformDisplayHandler implements IHandleCommandString {
         return summary
     }
 }
-

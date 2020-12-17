@@ -36,7 +36,7 @@
             "groupName": "variables"
         },
         {
-            "name": "inputTargetPlanOrStateFilePath",
+            "name": "planFilePath",
             "type": "string",
             "label": "Target Plan File Path",
             "required": true,
