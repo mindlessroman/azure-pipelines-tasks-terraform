@@ -48,6 +48,14 @@
         "Node14": {
             "target": ".bin/index.js",
             "argumentFormat": ""
+        },
+        "Node": {
+            "target": ".bin/index.js",
+            "argumentFormat": ""
+        },
+        "Node10": {
+            "target": ".bin/index.js",
+            "argumentFormat": ""
         }
     }
 }

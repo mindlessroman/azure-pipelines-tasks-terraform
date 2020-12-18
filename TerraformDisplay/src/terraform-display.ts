@@ -30,9 +30,10 @@ export class TerraformDisplay {
     protected readonly workingDirectory: string
     protected stdout: Buffer[] = [];
     protected stderr: Buffer[] = [];
-    protected taskAgent: TaskAgent | undefined
+    protected taskAgent: TaskAgent
     protected execOptions: IExecOptions
     protected args: string[] = []
+    protected uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
     constructor(
         workingDirectory: string = "./",
@@ -60,20 +61,42 @@ export class TerraformDisplay {
             silent: true,
         }
 
-        if (secureVarsFile) {
-            this.taskAgent = new TaskAgent()
-            this.taskAgent.downloadSecureFile(secureVarsFile)
-                .then((res) => {
-                    this.secureVarsFile = res
-                })
-                .catch((err) => {
-                    throw new Error(`Failed to download secure vars file ${err}`)
-                })
-        } else {
-            this.taskAgent = undefined
-            this.secureVarsFile = undefined
-        }
+        this.secureVarsFile = secureVarsFile
+        this.taskAgent = new TaskAgent()
+    }
 
+    private async getSecureVarsFile(idOrName: string): Promise<string> {
+
+        tasks.debug(` Secure file is configured to ${this.secureVarsFile}`)
+        let fname: string
+        // if we get filename here instead of UUID
+        // then we are not running in agent, and will
+        // try to regard this as the filename.
+        if (!this.uuidPattern.test(idOrName)) {
+            tasks.debug(`Secure vars file is not UUID (${idOrName}), assuming relative path.`)
+            fname = tasks.resolve(this.workingDirectory, idOrName)
+        } else {
+            fname = await this.taskAgent.downloadSecureFile(idOrName)
+        }
+        return fname
+    }
+
+    private async loadEnv(): Promise<void> {
+        if (this.secureVarsFile) {
+            return this.getSecureVarsFile(this.secureVarsFile)
+                .then((path) => {
+                    tasks.debug(` Loading enviroment from ${path}`)
+                    const config = dotenv.config({
+                        path: path,
+                        debug: true
+                    })
+                        .parsed
+
+                    if ((!config) || (Object.keys(config).length === 0 && config.constructor === Object)) {
+                        throw "The .env file doesn't have valid entries.";
+                    }
+                })
+        }
     }
 
     public async execute(): Promise<number> {
@@ -86,34 +109,30 @@ export class TerraformDisplay {
         return this
     }
 
-    protected run(): Promise<number> {
+    protected async run(): Promise<number> {
 
         this.arg(this.planFilePath)
 
-        if (this.secureVarsFile) {
-            const config = dotenv.config({ path: this.secureVarsFile }).parsed;
-            if ((!config) || (Object.keys(config).length === 0 && config.constructor === Object)) {
-                throw "The .env file doesn't have valid entries.";
-            }
-        }
-
-        tasks.debug(`Running terraform ${this.args.join(" ")}`)
-        return new Promise<number>((resolve, reject) => {
-            this.tool.exec(this.execOptions)
-                .then((code) => {
-                    if (code > 0) {
-                        tasks.error(`Failed to run terraform show ${this.args.join(" ")}: ${this.buffersToString(this.stderr)}`)
-                        reject(code)
-                    }
-                    tasks.debug(`Completed terraform show ${this.args.join(" ")}`)
-                    resolve(code)
+        tasks.debug(`Running terraform show ${this.args.join(" ")}`)
+        return this.loadEnv()
+            .then(() => {
+                return new Promise<number>((resolve, reject) => {
+                    this.tool.exec(this.execOptions)
+                        .then((code) => {
+                            if (code > 0) {
+                                tasks.error(`Failed to run terraform show ${this.args.join(" ")}: ${this.buffersToString(this.stderr)}`)
+                                reject(code)
+                            }
+                            tasks.debug(`Completed terraform show ${this.args.join(" ")}`)
+                            resolve(code)
+                        })
+                        .catch((err) => {
+                            const e = (`Failed to run terraform show ${this.args.join(" ")} : ${err}`)
+                            tasks.error(e)
+                            throw new Error(e)
+                        })
                 })
-                .catch((err) => {
-                    const e = (`Failed to run terraform show ${this.args.join(" ")} : ${err}`)
-                    tasks.error(e)
-                    throw new Error(e)
-                })
-        })
+            })
     }
 
     protected buffersToString(buffers: Buffer[]): string {
