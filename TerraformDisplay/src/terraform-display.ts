@@ -1,7 +1,6 @@
 import tasks = require('azure-pipelines-task-lib/task');
 import { IExecOptions, ToolRunner } from 'azure-pipelines-task-lib/toolrunner';
 import * as dotenv from "dotenv";
-import { createWriteStream } from 'fs';
 import TaskAgent from './task-agent';
 
 
@@ -19,8 +18,8 @@ interface TypeSummary {
 }
 
 interface PlanSummary {
-    resources: TypeSummary
-    outputs: TypeSummary
+    resources: TypeSummary | undefined
+    outputs: TypeSummary | undefined
 }
 
 export class TerraformDisplay {
@@ -31,7 +30,7 @@ export class TerraformDisplay {
     protected readonly workingDirectory: string
     protected stdout: Buffer[] = [];
     protected stderr: Buffer[] = [];
-    protected taskAgent: TaskAgent
+    protected taskAgent: TaskAgent | undefined
     protected execOptions: IExecOptions
     protected args: string[] = []
 
@@ -45,8 +44,8 @@ export class TerraformDisplay {
         this.workingDirectory = tasks.resolve(workingDirectory)
         this.planFilePath = tasks.resolve(this.workingDirectory, planFilePath);
 
-        this.tool = new ToolRunner('terraform').arg('show')
-        
+        this.tool = tasks.tool('terraform').arg('show')
+
         this.tool.on("stdout", (data: Buffer) => {
             this.stdout.push(data);
         });
@@ -61,9 +60,8 @@ export class TerraformDisplay {
             silent: true,
         }
 
-        this.taskAgent = new TaskAgent()
-
         if (secureVarsFile) {
+            this.taskAgent = new TaskAgent()
             this.taskAgent.downloadSecureFile(secureVarsFile)
                 .then((res) => {
                     this.secureVarsFile = res
@@ -71,21 +69,25 @@ export class TerraformDisplay {
                 .catch((err) => {
                     throw new Error(`Failed to download secure vars file ${err}`)
                 })
+        } else {
+            this.taskAgent = undefined
+            this.secureVarsFile = undefined
         }
+
     }
 
     public async execute(): Promise<number> {
         return this.run()
     }
 
-    protected arg(arg: string): TerraformDisplay{
+    protected arg(arg: string): TerraformDisplay {
         this.tool.arg(arg)
         this.args.push(arg)
         return this
     }
 
     protected run(): Promise<number> {
-        
+
         this.arg(this.planFilePath)
 
         if (this.secureVarsFile) {
@@ -98,19 +100,19 @@ export class TerraformDisplay {
         tasks.debug(`Running terraform ${this.args.join(" ")}`)
         return new Promise<number>((resolve, reject) => {
             this.tool.exec(this.execOptions)
-            .then((code) => {
-                if (code > 0) {
-                    tasks.error(`Failed to run terraform show ${this.args.join(" ")}: ${this.buffersToString(this.stderr)}`)
-                    reject(code)
-                }
-                tasks.debug(`Completed terraform show ${this.args.join(" ")}`)
-                resolve(code)
-            })
-            .catch((err) => {
-                const e = (`Failed to run terraform show ${this.args.join(" ")} : ${err}`)
-                tasks.error(e)
-                throw new Error(e)
-            })
+                .then((code) => {
+                    if (code > 0) {
+                        tasks.error(`Failed to run terraform show ${this.args.join(" ")}: ${this.buffersToString(this.stderr)}`)
+                        reject(code)
+                    }
+                    tasks.debug(`Completed terraform show ${this.args.join(" ")}`)
+                    resolve(code)
+                })
+                .catch((err) => {
+                    const e = (`Failed to run terraform show ${this.args.join(" ")} : ${err}`)
+                    tasks.error(e)
+                    throw new Error(e)
+                })
         })
     }
 
@@ -157,18 +159,17 @@ export class TerraformDisplayPlainPlan extends TerraformDisplay {
         }
 
         this.execOptions.silent = false
-
-        this.execOptions.outStream = createWriteStream(this.attachment.sourceFile)
     }
 
     public async execute(): Promise<number> {
 
-        this.tool.pipeExecOutputToTool(
-            tasks.tool("tee").arg(this.attachment.sourceFile),
-        )
-
         return this.run()
             .then((code) => {
+                if (this.stdout[0] && typeof this.stdout[0] === "string") {
+                    tasks.debug("Running tests, the are stupid.")
+                } else {
+                    tasks.writeFile(this.attachment.sourceFile, Buffer.concat(this.stdout))
+                }
                 tasks.addAttachment(this.attachment.type, this.attachment.attachmentName, this.attachment.sourceFile)
                 return code
             })
@@ -209,12 +210,14 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
 
         return this.run()
             .then((code) => {
+
                 const summary = this.getPlanSummary(this.buffersToString(this.stdout))
-                if (this.produceWarningsAtSummary) { this.produceWarnings(summary) }
-    
+
+                if (this.produceWarningsAtSummary && summary) { this.produceWarnings(summary) }
+
                 tasks.writeFile(this.attachment.sourceFile, JSON.stringify(summary))
                 tasks.addAttachment(this.attachment.type, this.attachment.attachmentName, this.attachment.sourceFile)
-    
+
                 return code
             })
             .catch((err) => {
@@ -222,16 +225,28 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
             })
     }
 
+    private getStr(i: number, w: string): string {
+        let m = "unknown amount of"
+        let s = "s"
+        if (i >= 0) {
+            m = `${i}`
+            if (i == 1) { s = '' }
+        }
+
+        return `${m} ${w}${s}`
+    }
+
+    private planWarningLine(t: string, resources: number, outputs: number) {
+        const l: string = `This plan is going to ${t} ${this.getStr(resources, 'resource')} and ${this.getStr(outputs, 'output')}.`
+        if (resources != 0 || outputs != 0) {
+            tasks.warning(l)
+        }
+    }
+
     private produceWarnings(s: PlanSummary): void {
-        if (s.outputs.toDelete + s.resources.toDelete > 0) {
-            tasks.warning(`This plan is going to destroy ${s.resources.toDelete} resources and ${s.outputs.toDelete} ouputs.`)
-        }
-        if (s.outputs.toUpdate + s.resources.toUpdate > 0) {
-            tasks.warning(`This plan is going to update ${s.resources.toUpdate} resources and ${s.outputs.toUpdate} outputs.`)
-        }
-        if (s.outputs.toCreate + s.resources.toCreate > 0) {
-            tasks.warning(`This plan is going to create ${s.resources.toCreate} resources and ${s.outputs.toCreate} outputs.`)
-        }
+        this.planWarningLine("destroy", s.outputs ? s.outputs.toDelete : -1, s.resources ? s.resources.toDelete : -1)
+        this.planWarningLine("update", s.outputs ? s.outputs.toUpdate : -1, s.resources ? s.resources.toUpdate : -1)
+        this.planWarningLine("create", s.outputs ? s.outputs.toCreate : -1, s.resources ? s.resources.toCreate : -1)
     }
 
     private updateSummary(action: string, summary: TypeSummary): TypeSummary {
@@ -277,18 +292,37 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
 
     }
 
-    private getPlanSummary(planJson: string): PlanSummary {
-        const jsonResult = JSON.parse(planJson.replace(/(\r\n|\r|\n)/gm, ""));
-        const resources: Array<any> = jsonResult.resource_changes as Array<any>
-        const outputs: Array<any> = Object.keys(jsonResult.output_changes).map((key) => { return jsonResult.output_changes[key] })
-
-
+    private getPlanSummary(planJson: string): PlanSummary | undefined {
         const summary: PlanSummary = {
-            resources: this.getChanges(resources, (resource: any) => { return resource.change.actions || [] }),
-            outputs: this.getChanges(outputs, (resource: any) => { return resource.actions || [] }),
+            resources: undefined,
+            outputs: undefined
+        }
+
+        const jsonResult = JSON.parse(planJson.replace(/(\r\n|\r|\n)/gm, ""));
+        if (!jsonResult) {
+            tasks.error("Failed to parse JSON plan output.")
+            tasks.setResult(tasks.TaskResult.SucceededWithIssues, "Failed to parse json plan.", false)
+            return undefined
+        }
+
+        const resources: Array<any> = jsonResult.resource_changes as Array<any>
+        if (!resources) {
+            tasks.error("No 'resource_changes' key in the json plan or it is not an array.")
+            tasks.setResult(tasks.TaskResult.SucceededWithIssues, "Failed to parse json plan.", false)
+        } else {
+            summary.resources = this.getChanges(resources, (resource: any) => { return resource.change.actions || [] })
+        }
+
+        if (!jsonResult.output_changes) {
+            tasks.error("No 'resource_changes' key in the json plan or it is not an array.")
+            tasks.setResult(tasks.TaskResult.SucceededWithIssues, "Failed to parse json plan.", false)
+        } else {
+            const outputs: Array<any> = Object.keys(jsonResult.output_changes).map((key) => { return jsonResult.output_changes[key] })
+            summary.outputs = this.getChanges(outputs, (resource: any) => { return resource.actions || [] })
         }
 
         tasks.debug("Calculated the following summary: " + JSON.stringify(summary))
+
         return summary
     }
 }
