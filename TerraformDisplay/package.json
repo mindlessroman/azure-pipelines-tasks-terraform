@@ -10,8 +10,8 @@
     "delete": "npx tfx build tasks delete --task-id 320ec1e4-3b96-11eb-adc1-0242ac120002",
     "upload": "npx tfx build tasks upload --task-path .dist",
     "start": "node --require dotenv/config .bin/index.js",
-    "test": "npx nyc -r cobertura -r html \"./node_modules/.bin/mocha\" \".bin/tests/**/*_spec.js\" --timeout 999999 --reporter mocha-junit-reporter --reporter-options \"mochaFile=./.test-output/terraform-cli.xml\"",
-    "test:local": "npx mocha \".bin/tests/**/*_spec.js\" --timeout 999999"
+    "test": "npx nyc -r cobertura -r html \"./node_modules/.bin/mocha\" \".bin/tests/_suite.js\" --timeout 999999 --reporter mocha-junit-reporter --reporter-options \"mochaFile=./.test-output/terraform-cli.xml\"",
+    "test:local": "npx mocha \".bin/tests/_suite.js\" --timeout 999999"
   },
   "repository": {
     "type": "git",

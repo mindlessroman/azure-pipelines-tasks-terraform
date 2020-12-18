@@ -45,7 +45,7 @@
         }
     ],
     "execution": {
-        "Node": {
+        "Node14": {
             "target": ".bin/index.js",
             "argumentFormat": ""
         }
