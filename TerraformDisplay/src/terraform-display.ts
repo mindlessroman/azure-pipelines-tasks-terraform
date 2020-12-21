@@ -263,9 +263,9 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
     }
 
     private produceWarnings(s: PlanSummary): void {
-        this.planWarningLine("destroy", s.outputs ? s.outputs.toDelete : -1, s.resources ? s.resources.toDelete : -1)
-        this.planWarningLine("update", s.outputs ? s.outputs.toUpdate : -1, s.resources ? s.resources.toUpdate : -1)
-        this.planWarningLine("create", s.outputs ? s.outputs.toCreate : -1, s.resources ? s.resources.toCreate : -1)
+        this.planWarningLine("destroy", s.resources ? s.resources.toDelete : -1, s.outputs ? s.outputs.toDelete : -1)
+        this.planWarningLine("update", s.resources ? s.resources.toUpdate : -1, s.outputs ? s.outputs.toUpdate : -1)
+        this.planWarningLine("create", s.resources ? s.resources.toCreate : -1, s.outputs ? s.outputs.toCreate : -1)
     }
 
     private updateSummary(action: string, summary: TypeSummary): TypeSummary {
@@ -324,10 +324,16 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
             return undefined
         }
 
+        if (!jsonResult.format_version) {
+            tasks.warning("Terraform show json output does not have format_version key. Task code update might be required.")
+        } else {
+            tasks.debug(`Getting values from plan json version: ${jsonResult.format_version}.`)
+        }
+
         const resources: Array<any> = jsonResult.resource_changes as Array<any>
         if (!resources) {
-            tasks.error("No 'resource_changes' key in the json plan or it is not an array.")
-            tasks.setResult(tasks.TaskResult.SucceededWithIssues, "Failed to parse json plan.", false)
+            tasks.debug("There is no 'resources' key in plan json, means no changes.")
+            summary.resources = { toCreate: 0, toUpdate: 0, toDelete: 0, unchanged: 0 }
         } else {
             summary.resources = this.getChanges(resources, (resource: any) => { return resource.change.actions || [] })
         }
