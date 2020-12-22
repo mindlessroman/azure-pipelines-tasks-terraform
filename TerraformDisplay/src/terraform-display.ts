@@ -88,7 +88,7 @@ export class TerraformDisplay {
                     tasks.debug(` Loading enviroment from ${path}`)
                     const config = dotenv.config({
                         path: path,
-                        debug: true
+                        debug: false,
                     })
                         .parsed
 
