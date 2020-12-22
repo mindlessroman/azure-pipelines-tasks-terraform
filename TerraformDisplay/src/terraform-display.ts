@@ -333,7 +333,7 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
         const resources: Array<any> = jsonResult.resource_changes as Array<any>
         if (!resources) {
             tasks.debug("There is no 'resources' key in plan json, means no changes.")
-            summary.resources = { toCreate: 0, toUpdate: 0, toDelete: 0, unchanged: 0 }
+            summary.resources = { toCreate: 0, toUpdate: 0, toDelete: 0, unchanged: -1 } // -1 to report unknow, because there is no way to calculate that.
         } else {
             summary.resources = this.getChanges(resources, (resource: any) => { return resource.change.actions || [] })
         }
