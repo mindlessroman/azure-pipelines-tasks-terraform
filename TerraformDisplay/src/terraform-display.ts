@@ -86,11 +86,7 @@ export class TerraformDisplay {
             return this.getSecureVarsFile(this.secureVarsFile)
                 .then((path) => {
                     tasks.debug(` Loading enviroment from ${path}`)
-                    const config = dotenv.config({
-                        path: path,
-                        debug: false,
-                    })
-                        .parsed
+                    const config = dotenv.config({ path: path }).parsed
 
                     if ((!config) || (Object.keys(config).length === 0 && config.constructor === Object)) {
                         throw "The .env file doesn't have valid entries.";
@@ -332,15 +328,15 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
 
         const resources: Array<any> = jsonResult.resource_changes as Array<any>
         if (!resources) {
-            tasks.debug("There is no 'resources' key in plan json, means no changes.")
-            summary.resources = { toCreate: 0, toUpdate: 0, toDelete: 0, unchanged: -1 } // -1 to report unknow, because there is no way to calculate that.
+            tasks.debug("There is no 'resources' key in plan json. The plan does not have any resources defined.")
+            summary.resources = { toCreate: 0, toUpdate: 0, toDelete: 0, unchanged: 0 } // -1 to report unknow, because there is no way to calculate that.
         } else {
             summary.resources = this.getChanges(resources, (resource: any) => { return resource.change.actions || [] })
         }
 
         if (!jsonResult.output_changes) {
-            tasks.error("No 'resource_changes' key in the json plan or it is not an array.")
-            tasks.setResult(tasks.TaskResult.SucceededWithIssues, "Failed to parse json plan.", false)
+            tasks.debug("No 'output_changes' key in the json plan, outputs are not defined for the plan.")
+            summary.outputs = { toCreate: 0, toUpdate: 0, toDelete: 0, unchanged: 0 }
         } else {
             const outputs: Array<any> = Object.keys(jsonResult.output_changes).map((key) => { return jsonResult.output_changes[key] })
             summary.outputs = this.getChanges(outputs, (resource: any) => { return resource.actions || [] })
