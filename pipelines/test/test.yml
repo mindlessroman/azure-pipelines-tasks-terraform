@@ -1,0 +1,13 @@
+parameters:
+  scenarios: ["test_1.yml"]
+
+stages:
+- stage: test
+  dependsOn: install
+  variables:
+    - group: env_test
+  jobs:
+    - ${{ each scenario in parameters.scenarios }}:
+      - template: ${{ scenario }}
+
+    

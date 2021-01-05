@@ -1,0 +1,30 @@
+parameters:
+  name: ''
+  directory: ''
+
+jobs:
+  - job: terraform_${{ parameters.name }}
+    steps: 
+    - task: DownloadPipelineArtifact@2
+      displayName: download terraform ${{ parameters.name }}
+      inputs: 
+        artifact: terraform_${{ parameters.name }}
+        path: $(terraform_extension_dir)
+    - task: Npm@1
+      displayName: install  
+      inputs:
+        workingDir: ${{ parameters.directory }}
+        command: install
+    - task: Npm@1
+      displayName: delete
+      continueOnError: 'true'
+      inputs:
+        workingDir: ${{ parameters.directory }}
+        command: custom
+        customCommand: run delete -- -t $(ado_access_token) -u $(ado_service_url)
+    - task: Npm@1
+      displayName: upload
+      inputs:
+        workingDir: ${{ parameters.directory }}
+        command: custom
+        customCommand: run upload -- -t $(ado_access_token) -u $(ado_service_url)

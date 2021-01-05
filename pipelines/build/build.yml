@@ -1,0 +1,9 @@
+stages:
+- stage: build
+  variables:
+    - group: build
+  jobs:
+  - template: build_version.yml
+  - template: build_terraform_installer.yml
+  - template: build_terraform_cli.yml
+  - template: build_terraform_extension.yml

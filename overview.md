@@ -16,9 +16,8 @@ The Terraform CLI task supports executing the following commands
 - refresh
 - import
 - output
-- fmt
 
-## (NEW) Terraform Output to Pipeline Variables
+## Terraform Output to Pipeline Variables
 
 The TerraformCLI task supports running terraforms `output` command. When this is run, pipeline variables will be created from each output variable emitted from the `terraform output` command. Sensitive variables will be set as secret pipeline variables and their values will not be emitted to the pipeline logs.
 
@@ -36,7 +35,7 @@ The dedicated `Terraform Installer` task allows for complete control over how fr
 
 ![Terraform Installer Task Definition](https://raw.githubusercontent.com/charleszipp/azure-pipelines-tasks-terraform/master/screenshots/overview-tfinstall-task-fields.jpg)
 
-### (NEW) Support for Installing `Latest` Version
+### Support for Installing `Latest` Version
 
 The installer task supports installing the latest terraform version by using the keyword `latest` as the version specified. This is the default option when the installer is added to a pipeline. Specifying latest will instruct the task to lookup and install the latest version of the terraform executable.
 

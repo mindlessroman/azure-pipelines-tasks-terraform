@@ -1,0 +1,34 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+  tags:
+    include:
+      - '*'
+  paths:
+    exclude: 
+      - '**/*.md'
+      - '**/*.(jpg|jpeg|png)'
+      - '**/*.tf'
+      - '**/*.env'
+      - '**/*.vars'        
+      - '_test-agent/*'
+      - '.vscode/*'
+      - 'screenshots/*'
+      - 'templates/*'
+      - 'LICENSE'    
+
+variables:
+  terraform_extension_dir: $(System.DefaultWorkingDirectory)
+  terraform_installer_dir: $(System.DefaultWorkingDirectory)/tasks/terraform-installer
+  terraform_cli_dir: $(System.DefaultWorkingDirectory)/tasks/terraform-cli
+  terraform_templates_dir: $(System.DefaultWorkingDirectory)/templates
+
+name: $(GitVersion.FullSemVer)
+
+stages:
+  - template: build/build.yml
+  - template: install/install.yml
+  - template: test/test.yml
+  - template: publish/publish.yml

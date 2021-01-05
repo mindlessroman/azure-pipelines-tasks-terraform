@@ -1,0 +1,14 @@
+stages:
+- stage: install
+  dependsOn: build
+  variables: 
+    - group: env_test
+  jobs: 
+    - template: install_terraform_task.yml
+      parameters:
+        name: installer
+        directory: $(terraform_installer_dir)    
+    - template: install_terraform_task.yml
+      parameters:
+        name: cli
+        directory: $(terraform_cli_dir)

@@ -1,13 +1,13 @@
 {
     "manifestVersion": 1,
     "id": "azure-pipelines-tasks-terraform",
-    "name": "Terraform Build & Release Tasks",
+    "name": "Azure Pipelines Terraform Tasks",
     "version": "0.4.14",
     "publisher": "charleszipp",
     "targets": [{
         "id": "Microsoft.VisualStudio.Services"
     }],
-    "description": "Tasks to execute terraform commands during Azure DevOps Build & Release pipelines",
+    "description": "Tasks to execute terraform commands during Azure Pipelines",
     "categories": [
         "Build and release"
     ],
@@ -15,8 +15,8 @@
         "default": "vss-extension-icon.png"
     },
     "files": [
-        { "path": "TerraformCLI/.dist", "packagePath": "TerraformCLI" },
-        { "path": "TerraformInstaller/.dist", "packagePath": "TerraformInstaller" }
+        { "path": "tasks/terraform-cli/.dist", "packagePath": "terraform-cli" },
+        { "path": "tasks/terraform-installer/.dist", "packagePath": "terraform-installer" }
     ],
     "repository" : {
         "type" : "git",

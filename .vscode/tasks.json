@@ -1,23 +1,92 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558 
-    // for the documentation about the tasks.json format
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "build tf cli",
-            "type": "npm",
-            "script": "build",
-            "path": "TerraformCLI/",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "test tf cli",
-            "type": "npm",
-            "script": "test",
-            "path": "TerraformCLI/",
-            "group": "test",
-            "problemMatcher": []
-        }
-    ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "install",
+			"path": "tasks/terraform-cli/",
+			"problemMatcher": [],
+			"label": "install - tasks/terraform-cli",
+			"detail": "install dependencies from package"
+		},
+		{
+			"type": "typescript",
+			"tsconfig": "tasks/terraform-cli/tsconfig.json",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build",
+			"label": "build - tasks/terraform-cli"
+		},
+		{
+			"type": "typescript",
+			"tsconfig": "tasks/terraform-cli/tsconfig.json",
+			"option": "watch",
+			"problemMatcher": [
+				"$tsc-watch"
+			],
+			"group": "build",
+			"label": "watch - tasks/terraform-cli"
+		},
+		{
+			"type": "npm",
+			"script": "start",
+			"path": "tasks/terraform-cli/",
+			"problemMatcher": [],
+			"label": "start - tasks/terraform-cli",
+			"detail": "ts-node -r dotenv/config ./src/index.ts"
+		},
+		{
+			"type": "npm",
+			"script": "test",
+			"path": "tasks/terraform-cli/",
+			"group": "test",
+			"problemMatcher": [],
+			"label": "test - tasks/terraform-cli",
+			"detail": "cucumber-js -p default"
+		},
+		{
+			"type": "npm",
+			"script": "test -- --name \"${input:scenario}\"",
+			"path": "tasks/terraform-cli/",
+			"group": "test",
+			"problemMatcher": [],
+			"label": "test scenario - tasks/terraform-cli",
+			"detail": "cucumber-js -p default"
+		},
+		{
+			"type": "typescript",
+			"tsconfig": "tasks/terraform-installer/tsconfig.json",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build",
+			"label": "build - tasks/terraform-installer"
+		},
+		{
+			"type": "typescript",
+			"tsconfig": "tasks/terraform-installer/tsconfig.json",
+			"option": "watch",
+			"problemMatcher": [
+				"$tsc-watch"
+			],
+			"group": "build",
+			"label": "watch - tasks/terraform-installer"
+		},
+		{
+			"type": "npm",
+			"script": "start",
+			"path": "tasks/terraform-installer/",
+			"problemMatcher": [],
+			"label": "start - tasks/terraform-installer",
+			"detail": "ts-node --require dotenv/config ./src/index.ts"
+		}
+	],
+	"inputs": [
+		{
+			"id": "scenario",
+			"type": "promptString",
+			"description": "The scenario to run"
+		}
+	]
 }

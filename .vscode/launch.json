@@ -3,75 +3,64 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [
+    "configurations": [        
         {
             "type": "node",
             "request": "launch",
-            "name": "debug:tf cli",
-            "preLaunchTask": "build tf cli",
-            "program": "${workspaceFolder}/TerraformCLI/src/index.ts",
-            "cwd": "${workspaceFolder}/TerraformCLI",
-            "protocol": "inspector",
-            "console": "integratedTerminal",
+            "name": "debug - tasks/terraform-cli",
+            "cwd": "${workspaceFolder}/tasks/terraform-cli",
+            "envFile": "${workspaceFolder}/tasks/terraform-cli/.env",
             "runtimeArgs": [
-                "--require",
-                "dotenv/config"
+                "-r",
+                "ts-node/register"                
             ],
-            "outFiles": [
-              "${workspaceFolder}/TerraformCLI/.bin/**/*.js"
+            "args": [
+                "${workspaceFolder}/tasks/terraform-cli/src/index.ts"
+            ],
+            "outputCapture": "std"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "debug:tests - tasks/terraform-cli",
+            "program": "${workspaceFolder}/tasks/terraform-cli/node_modules/cucumber/bin/cucumber-js",
+            "cwd": "${workspaceFolder}/tasks/terraform-cli",
+            "args": [
+                "-p", "default"
             ]
         },
         {
             "type": "node",
             "request": "launch",
-            "name": "debug:tf cli:tests",
-            "preLaunchTask": "build tf cli",
-            "program": "${workspaceFolder}/TerraformCLI/node_modules/mocha/bin/_mocha",
-            "cwd": "${workspaceFolder}/TerraformCLI",
+            "name": "debug:test - tasks/terraform-cli",
+            "program": "${workspaceFolder}/tasks/terraform-cli/node_modules/cucumber/bin/cucumber-js",
+            "cwd": "${workspaceFolder}/tasks/terraform-cli",
             "args": [
-                "--timeout",
-                "999999",
-                ".bin/tests/**/*_spec.js"
+                "-p", "default",
+                "--name", "${input:testScenario}"
             ]
-        },
+        },        
         {
             "type": "node",
             "request": "launch",
-            "name": "debug:tf cli:tests:scenario",
-            "preLaunchTask": "build tf cli",
-            "program": "${workspaceFolder}/TerraformCLI/node_modules/mocha/bin/_mocha",
-            "cwd": "${workspaceFolder}/TerraformCLI",
-            "args": [
-                "--timeout",
-                "999999",
-                ".bin/tests/terraform-force-unlock/force-unlock_spec.js"
+            "name": "debug - tasks/terraform-installer",
+            "cwd": "${workspaceFolder}/tasks/terraform-installer",
+            "envFile": "${workspaceFolder}/tasks/terraform-installer/.env",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"                
             ],
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "debug:tf cli:e2e",
-            "preLaunchTask": "build tf cli",
-            "program": "${workspaceFolder}/TerraformCLI/node_modules/mocha/bin/_mocha",
-            "cwd": "${workspaceFolder}/TerraformCLI",
             "args": [
-                "--timeout",
-                "999999",
-                ".bin/e2e/**/*_spec.js"
+                "${workspaceFolder}/tasks/terraform-installer/src/index.ts"
             ],
+            "outputCapture": "std"
         },
+    ],
+    "inputs": [
         {
-            "type": "node",
-            "request": "launch",
-            "name": "debug:tf installer",
-            "preLaunchTask": "tsc: build tf installer",
-            "program": "${workspaceFolder}/TerraformInstaller/src/index.ts",
-            "cwd": "${workspaceFolder}/TerraformInstaller",
-            "protocol": "inspector",
-            "console": "integratedTerminal",
-            "outFiles": [
-              "${workspaceFolder}/TerraformInstaller/.bin/**/*.js"
-            ]
+            "id": "testScenario",
+            "type": "promptString",
+            "description": "Name of the test scenario to debug"
         }
     ]
 }

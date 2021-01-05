@@ -1,0 +1,18 @@
+jobs:
+- deployment: marketplace
+  displayName: publish marketplace
+  environment: marketplace
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: Npm@1
+          displayName: install
+          inputs:
+            workingDir: $(terraform_extension_dir)  
+        # - task: Npm@1
+        #   displayName: publish
+        #   inputs:
+        #     workingDir: $(terraform_extension_dir)
+        #     command: custom
+        #     customCommand: 'run publish -- -t $(marketplace_access_token)'
