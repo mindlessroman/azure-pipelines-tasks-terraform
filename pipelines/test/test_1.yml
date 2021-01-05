@@ -16,7 +16,7 @@ jobs:
         command: init
         workingDirectory: $(terraform_templates_dir)
         backendType: azurerm
-        backendServiceArm: 'CSE - Dev Crew - Dallas (41f2f239-ca68-48bf-b2f0-dff8b108965a)'
+        backendServiceArm: 'env_test'
         ensureBackend: true
         backendAzureRmResourceGroupName: '$(backend_arm_resource_group)'
         backendAzureRmResourceGroupLocation: '$(backend_arm_location)'
@@ -34,7 +34,7 @@ jobs:
       inputs:
         command: plan
         workingDirectory: $(terraform_templates_dir)
-        environmentServiceName: 'CSE - Dev Crew - Dallas (41f2f239-ca68-48bf-b2f0-dff8b108965a)'
+        environmentServiceName: 'env_test'
         secureVarsFile: ddcbad51-7327-4408-a4b2-fb49aa2c4f28
         commandOptions: '-out=$(System.DefaultWorkingDirectory)/terraform.tfplan -detailed-exitcode'
     - task: TerraformCLI@0
@@ -42,7 +42,7 @@ jobs:
       inputs:
         command: apply
         workingDirectory: $(terraform_templates_dir)
-        environmentServiceName: 'CSE - Dev Crew - Dallas (41f2f239-ca68-48bf-b2f0-dff8b108965a)'
+        environmentServiceName: 'env_test'
         commandOptions: '$(System.DefaultWorkingDirectory)/terraform.tfplan'
     - task: TerraformCLI@0
       displayName: 'terraform output'
@@ -60,5 +60,5 @@ jobs:
       inputs:
         command: destroy
         workingDirectory: $(terraform_templates_dir)
-        environmentServiceName: 'CSE - Dev Crew - Dallas (41f2f239-ca68-48bf-b2f0-dff8b108965a)'
+        environmentServiceName: 'env_test'
         secureVarsFile: ddcbad51-7327-4408-a4b2-fb49aa2c4f28
