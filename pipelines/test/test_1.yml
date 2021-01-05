@@ -6,11 +6,11 @@ jobs:
       inputs: 
         artifact: terraform_templates
         path: $(terraform_extension_dir)
-    - task: TerraformInstaller@1
+    - task: TerraformInstaller@0
       displayName: install terraform
       inputs:
         terraformVersion: 0.14.3
-    - task: TerraformCLI@0
+  - task: TerraformCLI@0
       displayName: 'terraform init'
       inputs:
         command: init
