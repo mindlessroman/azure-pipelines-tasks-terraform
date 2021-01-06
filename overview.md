@@ -36,13 +36,15 @@ The installer task supports installing the latest terraform version by using the
 ```yaml
 - task: TerraformInstaller
     displayName: install terraform
+    inputs:
+        terraformVersion: latest
 ```
+
+If `terraformVersion` not provided, task defaults to `latest`
 
 ```yaml
 - task: TerraformInstaller
     displayName: install terraform
-    inputs:
-        terraformVersion: latest
 ```
 
 ### Install Specific Version
@@ -53,10 +55,6 @@ The installer task supports installing the latest terraform version by using the
     inputs:
         terraformVersion: 0.14.3
 ```
-
-## Contextual Task Configuration
-
-The task definition will adjust to the selected command to prompt for what is relevant to the command. For example, `validate` does not require knowledge of the backend configuration so this section will not be used when executing `validate`. The `validate` command does accept vars file however. Therefore, the field to specify vars file will be available.
 
 ## Azure Service Connection / Service Principal Integration
 
@@ -107,7 +105,7 @@ The task supports automatically creating the resource group, storage account, an
 
 ## Secure Variable Secrets
 
-There are three methods to provide secrets within the vars provided to terraform commands. First, if providing individual `-var` options to the command line, the secret pipeline variables can be used. Use the Command Options field to input your secret vars as `-var 'secret=$(mySecretPipelineVar)`. Secondly, a var file secured in Secure Files Library of Azure DevOps pipeline can be specified via drop-down menu. Storing sensitive var files in the Secure Files Library not only provides encryption at rest, it also allows the files to have different access control applied than that of the Source Repository and Build/Release Pipelines.
+There are multiple methods to provide secrets within the vars provided to terraform commands. The `commandOptions` input can be used to specify individual `-var` inputs. When using this approach pipeline variables can be used as `-var secret=$(mySecretPipelineVar)`. Additionally, either a terraform variables file or a env file secured in Secure Files Library of Azure DevOps pipeline can be specified. Storing sensitive var and env files in the Secure Files Library not only provides encryption at rest, it also allows the files to have different access control applied than that of the Source Repository and Build/Release Pipelines.
 
 ```yaml
 - task: TerraformCLI@0
@@ -147,6 +145,11 @@ output "some_string" {
   sensitive = false
   value = "somestringvalue"
 }
+
+output "some_sensitive_string" {
+  sensitive = true
+  value = "some-string-value"
+}
 ```
 
 Pipeline configuration to run terraform `output` command
@@ -162,9 +165,12 @@ Use output variables as pipeline variables
 
 ```yaml
 - bash: |
-        echo 'some_string is $(TF_OUT_SOME_STRING)'
+        echo 'some_string is $(TF_OUT_SOME_STRING)'        
+        echo 'some_sensitive_string is $(TF_OUT_SOME_SENSITIVE_STRING)'
     displayName: echo tf output vars
 ```
+
+**Note that `$(TF_OUT_SOME_SENSITIVE_STRING)` will be redacted as `***` in the pipeline logs.**
 
 ## Terraform Plan Change Detection
 
