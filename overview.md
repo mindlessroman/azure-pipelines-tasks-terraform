@@ -19,8 +19,6 @@ The Terraform CLI task supports executing the following commands
 - force-unlock
 - fmt
 
-
-
 ## Compatible with Linux Build Agents
 
 The tasks can execute on all supported build agent operating systems **including Ubuntu and MacOS**.
