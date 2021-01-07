@@ -6,6 +6,11 @@ jobs:
     runOnce:
       deploy:
         steps:
+        - task: DownloadPipelineArtifact@2
+          displayName: download terraform extension
+          inputs: 
+            artifact: terraform_extension
+            path: $(terraform_extension_dir)
         - task: Npm@1
           displayName: install
           inputs:
