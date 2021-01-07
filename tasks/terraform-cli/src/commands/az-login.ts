@@ -12,9 +12,9 @@ export class AzLogin implements ICommand {
         const options = await new RunWithAzCli("login").build();
         options.addArgs(
             "--service-principal", 
-            "-t", ctx.backendServiceArmTenantId,
-            "-u", ctx.backendServiceArmClientId,
-            "-p", ctx.backendServiceArmClientSecret
+            "-t", ctx.backendServiceArmTenantId || ctx.environmentServiceArmTenantId,
+            "-u", ctx.backendServiceArmClientId || ctx.environmentServiceArmClientId,
+            "-p", ctx.backendServiceArmClientSecret || ctx.environmentServiceArmClientSecret
         );
         const result = await this.runner.exec(options);
         return result.toCommandResponse();

@@ -35,6 +35,7 @@ export default class AzureRMProvider implements ITerraformProvider {
 
         //run az login so provisioners needing az cli can be run.
         await new CommandPipeline(this.runner)
-            .azLogin();
+            .azLogin()
+            .exec(ctx);
     }
 }

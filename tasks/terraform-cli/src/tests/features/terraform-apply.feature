@@ -21,6 +21,7 @@ Feature: terraform apply
             | clientId       | servicePrincipal1      |
             | clientSecret   | servicePrincipalKey123 |
         And running command "terraform apply -auto-approve" returns successful result
+        And azure cli exists
         And running command "az login" with the following options returns successful result
             | option                    |
             | --service-principal       |
