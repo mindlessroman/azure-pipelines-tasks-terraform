@@ -10,9 +10,9 @@ jobs:
           displayName: install
           inputs:
             workingDir: $(terraform_extension_dir)  
-        # - task: Npm@1
-        #   displayName: publish
-        #   inputs:
-        #     workingDir: $(terraform_extension_dir)
-        #     command: custom
-        #     customCommand: 'run publish -- -t $(marketplace_access_token)'
+        - task: Npm@1
+          displayName: publish
+          inputs:
+            workingDir: $(terraform_extension_dir)
+            command: custom
+            customCommand: 'run publish -- -t $(marketplace_access_token)'
