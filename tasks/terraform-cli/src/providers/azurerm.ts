@@ -1,5 +1,7 @@
 import { ITerraformProvider } from ".";
+import { CommandPipeline } from "../commands";
 import { ITaskContext } from "../context";
+import { IRunner } from "../runners";
 
 interface AzureRMProviderConfiguration{
     scheme: string;
@@ -10,7 +12,8 @@ interface AzureRMProviderConfiguration{
 }
 
 export default class AzureRMProvider implements ITerraformProvider {
-    constructor(){
+    constructor(
+        private readonly runner: IRunner){
     }
 
     async init(ctx: ITaskContext): Promise<void> {
@@ -29,5 +32,9 @@ export default class AzureRMProvider implements ITerraformProvider {
         process.env['ARM_TENANT_ID']        = config.tenantId;
         process.env['ARM_CLIENT_ID']        = config.clientId;
         process.env['ARM_CLIENT_SECRET']    = config.clientSecret;
+
+        //run az login so provisioners needing az cli can be run.
+        await new CommandPipeline(this.runner)
+            .azLogin();
     }
 }

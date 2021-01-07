@@ -15,7 +15,7 @@ export class TerraformForceUnlock implements ICommand {
     private getProvider(ctx: ITaskContext): ITerraformProvider | undefined {
         let provider: ITerraformProvider | undefined;
         if(ctx.environmentServiceName){
-            provider = new AzureRMProvider();
+            provider = new AzureRMProvider(this.runner);
         }
         return provider;
     }
