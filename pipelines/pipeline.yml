@@ -30,6 +30,6 @@ name: $(GitVersion.FullSemVer)
 
 stages:
   - template: build/build.yml
-  - template: install/install.yml
-  - template: test/test.yml
+  # - template: install/install.yml
+  # - template: test/test.yml
   - template: publish/publish.yml
