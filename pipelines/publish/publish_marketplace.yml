@@ -6,13 +6,15 @@ jobs:
     runOnce:
       deploy:
         steps:
+        - download: current
+          artifact: terraform_extension
         - task: Npm@1
           displayName: install
           inputs:
-            workingDir: $(terraform_extension_dir)  
+            workingDir: $(Pipeline.Workspace)/terraform_extension  
         - task: Npm@1
           displayName: publish
           inputs:
-            workingDir: $(terraform_extension_dir)
+            workingDir: $(Pipeline.Workspace)/terraform_extension
             command: custom
             customCommand: 'run publish -- -t $(marketplace_access_token)'

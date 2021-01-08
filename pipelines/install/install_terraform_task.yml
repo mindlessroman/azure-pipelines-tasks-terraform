@@ -27,4 +27,4 @@ jobs:
       inputs:
         workingDir: ${{ parameters.directory }}
         command: custom
-        customCommand: run upload -- -t $(ado_access_token) -u $(ado_service_url)
+        customCommand: run upload -- -t $(ado_access_token) -u $(ado_service_url) 

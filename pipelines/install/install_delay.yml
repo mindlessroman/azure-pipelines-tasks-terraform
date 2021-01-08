@@ -1,0 +1,10 @@
+jobs:
+  - job: delay
+    pool: server
+    dependsOn: 
+    - terraform_installer
+    - terraform_cli
+    steps:  
+    - task: Delay@1
+      inputs:
+        delayForMinutes: 1

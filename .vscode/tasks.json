@@ -80,6 +80,49 @@
 			"problemMatcher": [],
 			"label": "start - tasks/terraform-installer",
 			"detail": "ts-node --require dotenv/config ./src/index.ts"
+		},
+		{
+			"type": "npm",
+			"script": "pack",
+			"path": "tasks/terraform-cli/",
+			"problemMatcher": [],
+			"label": "pack - tasks/terraform-cli",
+			"dependsOn": [
+				"install - tasks/terraform-cli",
+				"build - tasks/terraform-cli"
+			]
+		},
+		{
+			"type": "npm",
+			"script": "pack",
+			"path": "tasks/terraform-installer/",
+			"problemMatcher": [],
+			"label": "pack - tasks/terraform-installer",
+			"dependsOn": [
+				"install - tasks/terraform-installer",
+				"build - tasks/terraform-installer"
+			]
+		},
+		{
+			"type": "npm",
+			"script": "install",
+			"path": ".",
+			"problemMatcher": [],
+			"label": "install - extension",
+			"detail": "install dependencies at the extension level"
+		},
+		{
+			"type": "npm",
+			"script": "pack",
+			"path": ".",
+			"problemMatcher": [],
+			"label": "pack - extension",
+			"dependsOn": [
+				"pack - tasks/terraform-cli",
+				"pack - tasks/terraform-installer",
+				"install - extension"
+			],
+			"dependsOrder": "parallel"
 		}
 	],
 	"inputs": [

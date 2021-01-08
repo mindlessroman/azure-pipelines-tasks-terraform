@@ -37,7 +37,9 @@ jobs:
         contents: |
           .bin/*
           !node_modules/.bin/*
-          package*.json               
+          package*.json
+          vss-extension.json
+          vss-extension-icon.png
         targetFolder: $(build.artifactstagingdirectory)/terraform_extension
     - task: PublishBuildArtifacts@1
       inputs:

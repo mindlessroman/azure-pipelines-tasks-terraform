@@ -11,4 +11,5 @@ stages:
     - template: install_terraform_task.yml
       parameters:
         name: cli
-        directory: $(terraform_cli_dir)
+        directory: $(terraform_cli_dir)    
+    - template: install_delay.yml
