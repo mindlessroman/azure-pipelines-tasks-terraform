@@ -1,0 +1,6 @@
+jobs:
+  - job: post-install delay
+    steps:  
+    - task: Delay@1
+      inputs:
+        delayForMinutes: 1
