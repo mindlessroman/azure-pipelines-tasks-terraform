@@ -15,7 +15,7 @@ jobs:
         - task: Npm@1
           displayName: publish
           inputs:
-            workingDir: $(Pipeline.Workspace)/terraform_extension
+            workingDir: $(Pipeline.Workspace)
             command: custom
             # customCommand: 'run publish -- -t $(marketplace_access_token)'
             customCommand: 'run publish -- -t foo'
