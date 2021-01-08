@@ -6,6 +6,8 @@ jobs:
     runOnce:
       deploy:
         steps:
+        - download: current
+          artifact: terraform_extension
         - task: Npm@1
           displayName: install
           inputs:
