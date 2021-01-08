@@ -1,5 +1,5 @@
 parameters:
-  scenarios: ["test_1.yml"]
+  scenarios: ["test_1.yml", "local_exec_az_cli.yml"]
 
 stages:
 - stage: test
