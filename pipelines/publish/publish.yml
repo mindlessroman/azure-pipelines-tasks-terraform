@@ -1,6 +1,6 @@
 stages:
 - stage: publish
-  dependsOn: test
+  # dependsOn: test
   variables:
     - group: env_prod
   # condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
