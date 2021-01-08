@@ -20,4 +20,5 @@ jobs:
           inputs:
             workingDir: $(terraform_extension_dir)
             command: custom
-            customCommand: 'run publish -- -t $(marketplace_access_token)'
+            # customCommand: 'run publish -- -t $(marketplace_access_token)'
+            customCommand: 'run pack'
