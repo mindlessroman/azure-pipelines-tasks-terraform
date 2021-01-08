@@ -18,4 +18,4 @@ jobs:
             workingDir: $(Pipeline.Workspace)/terraform_extension
             command: custom
             # customCommand: 'run publish -- -t $(marketplace_access_token)'
-            customCommand: 'run pack'
+            customCommand: 'run publish -- -t foo'
