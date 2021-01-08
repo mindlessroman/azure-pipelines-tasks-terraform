@@ -66,6 +66,12 @@ Feature: terraform destroy
             | ARM_TENANT_ID       | ten1                   |
             | ARM_CLIENT_ID       | servicePrincipal1      |
             | ARM_CLIENT_SECRET   | servicePrincipalKey123 |
+        And azure login is executed with the following options
+            | option                |
+            | --service-principal       |
+            | -t ten1                   |
+            | -u servicePrincipal1      |
+            | -p servicePrincipalKey123 |
         And the terraform cli task is successful
         And pipeline variable "TERRAFORM_LAST_EXITCODE" is set to "0"
 
@@ -93,6 +99,12 @@ Feature: terraform destroy
             | ARM_TENANT_ID       | ten1                   |
             | ARM_CLIENT_ID       | servicePrincipal1      |
             | ARM_CLIENT_SECRET   | servicePrincipalKey123 |
+        And azure login is executed with the following options
+            | option                |
+            | --service-principal       |
+            | -t ten1                   |
+            | -u servicePrincipal1      |
+            | -p servicePrincipalKey123 |
         And the terraform cli task is successful
         And pipeline variable "TERRAFORM_LAST_EXITCODE" is set to "0"
 
@@ -123,6 +135,12 @@ Feature: terraform destroy
             | TF_VAR_app-short-name | tffoo                  |
             | TF_VAR_region         | eastus                 |
             | TF_VAR_env-short-name | dev                    |
+        And azure login is executed with the following options
+            | option                |
+            | --service-principal       |
+            | -t ten1                   |
+            | -u servicePrincipal1      |
+            | -p servicePrincipalKey123 |
         And the terraform cli task is successful
         And pipeline variable "TERRAFORM_LAST_EXITCODE" is set to "0"
 
