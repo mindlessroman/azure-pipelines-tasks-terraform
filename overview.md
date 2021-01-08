@@ -117,7 +117,7 @@ There are multiple methods to provide secrets within the vars provided to terraf
         commandOptions: '-var secret=$(mySecretPipelineVar)'
 ```
 
-### Secure Env Files (NEW)
+### Secure Env Files
 
 If the Secure Variables file name is `*.env`, it is referred as `.env` file. This task loads environment variables from the `.env` file.
 
