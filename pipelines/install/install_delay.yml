@@ -4,6 +4,6 @@ jobs:
     - terraform_installer
     - terraform_cli
     steps:  
-    - task: Delay@1
+    - task: Delay
       inputs:
         delayForMinutes: 1
