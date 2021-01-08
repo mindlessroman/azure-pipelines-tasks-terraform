@@ -1,5 +1,5 @@
 jobs:
-  - job: post-install delay
+  - job: delay
     dependsOn: 
     - terraform_installer
     - terraform_cli
