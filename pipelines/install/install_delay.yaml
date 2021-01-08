@@ -1,5 +1,8 @@
 jobs:
   - job: post-install delay
+    dependsOn: 
+    - terraform_installer
+    - terraform_cli
     steps:  
     - task: Delay@1
       inputs:
