@@ -1,3 +1,4 @@
+import { command } from "azure-pipelines-task-lib";
 import { CommandResponse, ICommand } from ".";
 import { ITaskContext } from "../context";
 import { ITerraformProvider } from "../providers";
@@ -22,7 +23,7 @@ export class TerraformForceUnlock implements ICommand {
 
     async exec(ctx: ITaskContext): Promise<CommandResponse> {
         const provider = this.getProvider(ctx);
-        const options = await new RunWithTerraform(ctx)            
+        const options = await new RunWithTerraform(ctx, undefined, "force-unlock")            
             .withProvider(ctx, provider)
             .withForce()
             .withLockId(ctx.lockId)

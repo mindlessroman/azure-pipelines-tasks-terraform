@@ -5,17 +5,15 @@ import { ITaskContext } from "../../context";
 export default class RunWithTerraform extends RunnerOptionsBuilder {
     constructor(
         private readonly ctx: ITaskContext,
-        private readonly silent?: boolean
+        private readonly silent?: boolean,
+        private readonly command?: string
     ) {
         super();
     }
     build(): Promise<RunnerOptions> {
-        let commandName = this.ctx.name;
-        if (this.ctx.name == "forceunlock") {
-            commandName = "force-unlock";
-        }
+        const command = this.command || this.ctx.name;
         return Promise.resolve(
-            new RunnerOptions("terraform", commandName, this.ctx.cwd, this.silent)
+            new RunnerOptions("terraform", command, this.ctx.cwd, this.silent)
         )
     }
 }
