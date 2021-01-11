@@ -4,7 +4,7 @@ Feature: terraform force-unlock
 
     Scenario: force-unlock with azurerm
         Given terraform exists
-        And terraform command is "force-unlock"
+        And terraform command is "forceunlock"
         And azurerm service connection "dev" exists as
             | scheme         | ServicePrincipal       |
             | subscriptionId | sub1                   |
