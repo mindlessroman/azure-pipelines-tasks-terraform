@@ -20,7 +20,7 @@ export class Task {
         "import": "import",
         "refresh": "refresh",
         "output": "output",
-        "force-unlock": "forceUnlock",
+        "forceunlock": "forceUnlock",
         "show": "show",
         "fmt": "fmt"
     }

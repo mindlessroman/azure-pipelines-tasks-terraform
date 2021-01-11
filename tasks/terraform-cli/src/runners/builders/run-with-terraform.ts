@@ -10,8 +10,12 @@ export default class RunWithTerraform extends RunnerOptionsBuilder {
         super();
     }
     build(): Promise<RunnerOptions> {
+        let commandName = this.ctx.name;
+        if (this.ctx.name == "forceunlock") {
+            commandName = "force-unlock";
+        }
         return Promise.resolve(
-            new RunnerOptions("terraform", this.ctx.name, this.ctx.cwd, this.silent)
+            new RunnerOptions("terraform", commandName, this.ctx.cwd, this.silent)
         )
     }
 }
