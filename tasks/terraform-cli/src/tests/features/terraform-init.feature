@@ -127,9 +127,9 @@ Feature: terraform init
             | --encryption-services blob          |
             | --access-tier hot                   |
         And an azure storage container is created with the following options
-            | option                |
-            | --auth-mode login     |
-            | --name container      |
+            | option                 |
+            | --auth-mode login      |
+            | --name container       |
             | --account-name storage |
         And terraform is initialized with the following options
             | option                                                   |
@@ -193,9 +193,9 @@ Feature: terraform init
         When the terraform cli task is run
         Then an azure storage account is not created
         And an azure storage container is created with the following options
-            | option                |
-            | --auth-mode login     |
-            | --name container      |
+            | option                 |
+            | --auth-mode login      |
+            | --name container       |
             | --account-name storage |
         And terraform is initialized with the following options
             | option                                                   |
@@ -230,3 +230,17 @@ Feature: terraform init
         When the terraform cli task is run
         Then the terraform cli task fails with message "terraform init command supports only env files, no tfvars are allowed during this stage."
         And pipeline variable "TERRAFORM_LAST_EXITCODE" is set to "1"
+
+    Scenario: init with self-configured backend
+        Given terraform exists
+        And terraform command is "init" with options '-backend-config="/agentVSTS/agent_D/_work/207/apim/backend.tfvars"'
+        And self-configured backend
+        And running command "terraform init" with the following options returns successful result
+            | option                                                           |
+            | -backend-config=/agentVSTS/agent_D/_work/207/apim/backend.tfvars |
+        When the terraform cli task is run
+        Then terraform is initialized with the following options
+            | option                                                           |
+            | -backend-config=/agentVSTS/agent_D/_work/207/apim/backend.tfvars |
+        And the terraform cli task is successful
+        And pipeline variable "TERRAFORM_LAST_EXITCODE" is set to "0"

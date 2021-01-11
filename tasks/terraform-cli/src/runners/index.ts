@@ -20,6 +20,9 @@ export class RunnerOptions{
     addArgs(...args: string[]){
         this._args = this._args.concat(args);
     }
+    concatArgs(args: string[]){
+        this._args = this._args.concat(args);
+    }
 }
 
 export class RunnerResult {

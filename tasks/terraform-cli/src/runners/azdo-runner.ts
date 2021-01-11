@@ -43,12 +43,7 @@ export default class AzdoRunner implements IRunner {
         
         // add the args for the command
         options.args.forEach(arg => {
-            if(/\s/.test(arg)){
-                tool.line(arg);
-            }
-            else{
-                tool.arg(arg);
-            }
+            tool.arg(arg);
         });
 
         const exitCode = await tool.exec(<IExecOptions>{
