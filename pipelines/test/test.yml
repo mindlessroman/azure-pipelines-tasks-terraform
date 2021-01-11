@@ -1,5 +1,5 @@
 parameters:
-  scenarios: ["test_1.yml"]
+  scenarios: ["test_1.yml", "plan_with_comand_options_var_file.yml"]
 
 stages:
 - stage: test
