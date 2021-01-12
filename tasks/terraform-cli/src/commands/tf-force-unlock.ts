@@ -4,9 +4,11 @@ import { ITerraformProvider } from "../providers";
 import AzureRMProvider from "../providers/azurerm";
 import { IRunner } from "../runners";
 import { RunWithTerraform } from "../runners/builders";
+import { ITaskAgent } from "../task-agent";
 
 export class TerraformForceUnlock implements ICommand {
     constructor(
+        private readonly taskAgent: ITaskAgent,
         private readonly runner: IRunner
         ) {
     }
@@ -22,8 +24,9 @@ export class TerraformForceUnlock implements ICommand {
 
     async exec(ctx: ITaskContext): Promise<CommandResponse> {
         const provider = this.getProvider(ctx);
-        const options = await new RunWithTerraform(ctx)            
+        const options = await new RunWithTerraform(ctx, undefined, "force-unlock")            
             .withProvider(ctx, provider)
+            .withSecureVarFile(this.taskAgent, ctx.secureVarsFileId, ctx.secureVarsFileName)
             .withForce()
             .withLockId(ctx.lockId)
             .build();

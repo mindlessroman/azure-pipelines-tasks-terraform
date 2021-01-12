@@ -20,7 +20,7 @@ export class Task {
         "import": "import",
         "refresh": "refresh",
         "output": "output",
-        "force-unlock": "forceUnlock",
+        "forceunlock": "forceUnlock",
         "show": "show",
         "fmt": "fmt"
     }
@@ -99,7 +99,7 @@ export class Task {
     }
 
     forceUnlock(): commands.ICommand {
-        return new commands.ForceUnlockCommandHandler(this.runner);
+        return new commands.ForceUnlockCommandHandler(this.taskAgent, this.runner);
     }
     
     show(): commands.ICommand {

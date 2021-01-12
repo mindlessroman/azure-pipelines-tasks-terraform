@@ -58,6 +58,11 @@ export class TaskContextSteps {
         this.ctx.backendAzureRmKey = backend.key;
     }
 
+    @given("self-configured backend")
+    public inputSelfConfiguredBackend(){
+        this.ctx.backendType = BackendTypes.selfConfigured;
+    }
+
     @given("azurerm ensure backend is checked with the following")
     public inputAzureRmEnsureBackend(table: TableDefinition){
         const backend = table.rowsHash();
