@@ -44,7 +44,7 @@ export default class AzdoTaskContext implements ITaskContext {
         return this.getBoolInput("ensureBackend");
     }
     get backendServiceArm() {
-        return this.getInput("backendServiceArm", true);
+        return this.getInput("backendServiceArm");
     }
     get backendAzureRmResourceGroupName() {
         return this.getInput("backendAzureRmResourceGroupName", true);

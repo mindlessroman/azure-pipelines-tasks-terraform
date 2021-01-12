@@ -33,14 +33,14 @@ locals {
   suffix_2 = "core${var.env}${var.location_suffix}${var.app}"
 }
 resource "azurerm_resource_group" "rg_core" {
-  name      = "rg"${locals.suffix}
+  name      = "rg${local.suffix}"
   location  = var.location
 }
 
 resource "azurerm_storage_account" "st_core" {
-  name                      = "st"${locals.suffix_2}
+  name                      = "st${local.suffix_2}"
   location                  = var.location
-  resource_group_name       = "${azurerm_resource_group.rg_core.name}"
+  resource_group_name       = azurerm_resource_group.rg_core.name
   account_kind              = "StorageV2"
   account_tier              = "Standard"
   account_replication_type  = "LRS"

@@ -119,3 +119,6 @@ dist
 
 # tfx runtime files
 .taskkey
+
+
+.terraform.lock.hcl
