@@ -99,7 +99,7 @@ export class Task {
     }
 
     forceUnlock(): commands.ICommand {
-        return new commands.ForceUnlockCommandHandler(this.runner);
+        return new commands.ForceUnlockCommandHandler(this.taskAgent, this.runner);
     }
     
     show(): commands.ICommand {
