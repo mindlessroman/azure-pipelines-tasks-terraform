@@ -35,5 +35,5 @@ jobs:
           exists=$(az group exists -n $(backend_arm_resource_group)$(Build.BuildId))
           if [ $exists == 'true' ]
           then
-            az group delete -n $(backend_arm_resource_group)$(Build.BuildId)
+            az group delete -n $(backend_arm_resource_group)$(Build.BuildId) -y
           fi
