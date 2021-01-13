@@ -66,6 +66,29 @@ When executing commands that interact with Azure such as `plan`, `apply`, and `d
         environmentServiceName: 'My Azure Service Connection'
 ```
 
+### **Execute Azure CLI From Local-Exec Provisioner (NEW)**
+
+When an azure service connection is provided, the terraform cli task will run `az login` using the service connection credentials. This is intended to enable templates to execute az cli commands from a `local-exec` provisioner.
+
+This should allow the following template configuation to be run using this task
+
+```terraform
+resource "azurerm_storage_account" "st_core" {
+  name                      = "my-storage-account"
+  location                  = "eastus"
+  resource_group_name       = azurerm_resource_group.rg_core.name
+  account_kind              = "StorageV2"
+  account_tier              = "Standard"
+  account_replication_type  = "LRS"
+  
+
+  # can now be run by the terraform cli task from azure pipelines
+  provisioner "local-exec" {
+          command = "az storage blob service-properties update --account-name ${azurerm_storage_account.st_core.name} --static-website --index-document index.html --404-document index.html"
+  }
+}
+```
+
 ## Remote, Local and Self-configured Backend State Support
 
 The task currently supports the following backend configurations
