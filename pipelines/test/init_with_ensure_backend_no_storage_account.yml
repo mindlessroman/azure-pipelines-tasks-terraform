@@ -24,7 +24,7 @@ jobs:
         backendAzureRmStorageAccountSku: '$(backend_arm_storage_sku)'
         backendAzureRmContainerName: '$(backend_arm_storage_container)$(Build.BuildId)'
         backendAzureRmKey: init_ensure_backend_no_storage_$(Build.BuildId).tfstate
-    - task: AzureCLI@2
+    - task: AzureCLI@1
       displayName: delete created storage account
       ## make sure the resource group is cleaned up even if init fails
       condition: succeededOrFailed()
