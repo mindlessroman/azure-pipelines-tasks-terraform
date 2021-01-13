@@ -141,6 +141,7 @@ Feature: terraform init
             | -backend-config=arm_tenant_id=ten1                       |
             | -backend-config=arm_client_id=servicePrincipal1          |
             | -backend-config=arm_client_secret=servicePrincipalKey123 |
+        And terraform is initialized after ensure backend completes
         And the terraform cli task is successful
         And pipeline variable "TERRAFORM_LAST_EXITCODE" is set to "0"
 
@@ -207,6 +208,7 @@ Feature: terraform init
             | -backend-config=arm_tenant_id=ten1                       |
             | -backend-config=arm_client_id=servicePrincipal1          |
             | -backend-config=arm_client_secret=servicePrincipalKey123 |
+        And terraform is initialized after ensure backend completes
         And the terraform cli task is successful
         And pipeline variable "TERRAFORM_LAST_EXITCODE" is set to "0"
 

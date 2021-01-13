@@ -33,7 +33,7 @@ export default class AzureRMBackend implements ITerraformBackend {
         }
 
         if (ctx.ensureBackend === true) {
-            this.ensureBackend(ctx);
+            await this.ensureBackend(ctx);
         }
 
         return result;

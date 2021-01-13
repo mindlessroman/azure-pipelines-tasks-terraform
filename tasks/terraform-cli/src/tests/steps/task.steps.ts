@@ -6,6 +6,7 @@ import { requestedAnswers } from './mock-answer-spy';
 import { TableDefinition } from 'cucumber';
 import { MockTaskContext } from '../../context';
 import { CommandStatus } from '../../commands';
+import { _startsWith } from 'azure-pipelines-task-lib/internal';
 
 
 @binding([TaskRunner, MockTaskContext, TaskAnswers])
@@ -32,6 +33,19 @@ export class TerraformSteps {
     @then("terraform is initialized with the following options")
     public assertTerraformInitializedWithOptions(table: TableDefinition){
         this.assertExecutedCommandWithOptions("terraform init", table);
+    }
+
+    @then("terraform is initialized after ensure backend completes")
+    public assertTerraformInitializedAfterEnsureBackend(){
+        const commands = requestedAnswers["exec"];
+        const terraformInitIndex = commands.findIndex((command: string) => {
+            return command.startsWith("terraform init");
+        })
+        const commandsAfterInit = commands.slice(terraformInitIndex + 1);
+        expect(commandsAfterInit).to.satisfy((cmds: string[]) => {
+            return cmds.length == 0 || 
+                (cmds.findIndex((cmd: string) => { return cmd.startsWith("az") }) == -1)
+        })
     }
 
     @then("azure login is executed with the following options")
