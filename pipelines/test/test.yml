@@ -1,5 +1,5 @@
 parameters:
-  scenarios: ["test_1.yml", "plan_with_comand_options_var_file.yml", "init_with_self_configured_backend.yml"]
+  scenarios: ["test_1.yml", "local_exec_az_cli.yml", "plan_with_comand_options_var_file.yml", "init_with_self_configured_backend.yml"]
 
 stages:
 - stage: test

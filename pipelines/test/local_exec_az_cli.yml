@@ -1,0 +1,51 @@
+jobs:
+- job: local_exec_az_cli
+  variables: 
+    test_templates_dir: $(terraform_templates_dir)/local-exec-az-cli
+  steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: download terraform templates
+      inputs: 
+        artifact: terraform_templates
+        path: $(terraform_extension_dir)
+    - task: TerraformCLI@0
+      displayName: 'terraform init'
+      inputs:
+        command: init
+        workingDirectory: $(test_templates_dir)
+        backendType: azurerm
+        backendServiceArm: 'env_test'
+        ensureBackend: true
+        backendAzureRmResourceGroupName: '$(backend_arm_resource_group)'
+        backendAzureRmResourceGroupLocation: '$(backend_arm_location)'
+        backendAzureRmStorageAccountName: '$(backend_arm_storage_name)'
+        backendAzureRmStorageAccountSku: '$(backend_arm_storage_sku)'
+        backendAzureRmContainerName: '$(backend_arm_storage_container)'
+        backendAzureRmKey: local_exec_az_cli.tfstate
+    - task: TerraformCLI@0
+      displayName: 'terraform validate'
+      inputs:
+        workingDirectory: $(test_templates_dir)
+        secureVarsFile: 85f60b61-3430-4e92-83be-ea5b16eafaaf
+    - task: TerraformCLI@0
+      displayName: 'terraform plan'
+      inputs:
+        command: plan
+        workingDirectory: $(test_templates_dir)
+        environmentServiceName: 'env_test'
+        secureVarsFile: 85f60b61-3430-4e92-83be-ea5b16eafaaf
+        commandOptions: '-out=$(System.DefaultWorkingDirectory)/terraform.tfplan'
+    - task: TerraformCLI@0
+      displayName: 'terraform apply'
+      inputs:
+        command: apply
+        workingDirectory: $(test_templates_dir)
+        environmentServiceName: 'env_test'
+        commandOptions: '$(System.DefaultWorkingDirectory)/terraform.tfplan'
+    - task: TerraformCLI@0
+      displayName: 'terraform destroy'
+      inputs:
+        command: destroy
+        workingDirectory: $(test_templates_dir)
+        environmentServiceName: 'env_test'
+        secureVarsFile: 85f60b61-3430-4e92-83be-ea5b16eafaaf

@@ -34,6 +34,11 @@ export class TerraformSteps {
         this.assertExecutedCommandWithOptions("terraform init", table);
     }
 
+    @then("azure login is executed with the following options")
+    public assertAzureLoginExecutedWithOptions(table: TableDefinition){
+        this.assertExecutedCommandWithOptions("az login", table);
+    }
+
     @then("an azure storage account is created with the following options")
     public assertAzureStorageAccountCreatedWithOptions(table: TableDefinition){
         this.assertExecutedCommandWithOptions("az storage account create", table);
