@@ -1,5 +1,5 @@
 jobs:
-- job: init_with_self_configured_backend
+- job: init_with_ensure_backend_no_storage_account
   steps:
     - task: DownloadPipelineArtifact@2
       displayName: download terraform templates
