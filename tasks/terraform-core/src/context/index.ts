@@ -1,5 +1,3 @@
-import { ProxyConfiguration } from 'azure-pipelines-task-lib';
-
 export interface ITaskContext {
     name: string;
     cwd: string;

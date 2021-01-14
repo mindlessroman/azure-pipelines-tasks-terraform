@@ -1,5 +1,5 @@
 import { ITaskContext } from ".";
-import * as tasks from 'azure-pipelines-task-lib/task';
+import { ITaskLib } from "..";
 
 export default class AzdoTaskContext implements ITaskContext {
     protected getInput: (name: string, required?: boolean | undefined) => string;
@@ -13,7 +13,7 @@ export default class AzdoTaskContext implements ITaskContext {
     public startedAt: [number, number];
     public finishedAt: [number, number] | undefined;
     public runTime: number = 0;
-    constructor() {
+    constructor(tasks: ITaskLib) {
         this.getInput = <(name: string, required?: boolean | undefined) => string>tasks.getInput;
         this.getBoolInput = tasks.getBoolInput;
         this.getEndpointAuthorizationScheme = <(id: string, optional: boolean) => string>tasks.getEndpointAuthorizationScheme;

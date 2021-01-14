@@ -1,14 +1,12 @@
 import tasks = require("azure-pipelines-task-lib/task");
-import TaskAgent from "./task-agent";
+import { AzdoTaskAgent } from "terraform-core";
+import { TerraformDisplayContext } from "./context";
 import { TerraformDisplay, TerraformDisplayJsonPlan, TerraformDisplayPlainPlan } from "./terraform-display";
 
-const workingDirectory: string = tasks.getInput("workingDirectory") || "./"
-const secureVarsFile: string | undefined = tasks.getInput("secureVarsFile")
-const planFilePath: string = tasks.getInput("planFilePath") || "tfplan"
-const taskAgent = new TaskAgent();
-
-const plain: TerraformDisplay = new TerraformDisplayPlainPlan(taskAgent, workingDirectory, planFilePath, secureVarsFile)
-const json: TerraformDisplay = new TerraformDisplayJsonPlan(taskAgent, workingDirectory, planFilePath, secureVarsFile)
+const ctx = new TerraformDisplayContext(tasks);
+const taskAgent = new AzdoTaskAgent(tasks);
+const plain: TerraformDisplay = new TerraformDisplayPlainPlan(taskAgent, ctx, tasks)
+const json: TerraformDisplay = new TerraformDisplayJsonPlan(taskAgent, ctx, tasks)
 
 Promise.all([
     json.execute(),

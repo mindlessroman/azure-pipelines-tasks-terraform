@@ -1,7 +1,8 @@
 import tasks = require('azure-pipelines-task-lib/task');
 import { IExecOptions, ToolRunner } from 'azure-pipelines-task-lib/toolrunner';
 import * as dotenv from "dotenv";
-import { ITaskAgent } from 'terraform-core'
+import { ITaskAgent, ITaskLib } from 'terraform-core'
+import { ITerraformDisplayContext } from './context';
 
 
 interface TerrafromDisplayAttachment {
@@ -158,21 +159,20 @@ export class TerraformDisplayPlainPlan extends TerraformDisplay {
 
     constructor(
         taskAgent: ITaskAgent,
-        workingDirectory: string = "./",
-        planFilePath: string = "tfplan",
-        secureVarsFile?: string
+        ctx: ITerraformDisplayContext,
+        private readonly tasks: ITaskLib
     ) {
         super(
             taskAgent,
-            workingDirectory,
-            planFilePath,
+            ctx.cwd,
+            ctx.planFilePath,
             false,
-            secureVarsFile
+            ctx.secureVarsFile
         )
 
         this.attachment = {
             type: "plan.text",
-            sourceFile: tasks.resolve(this.workingDirectory, "tfplan.txt"),
+            sourceFile: this.tasks.resolve(this.workingDirectory, "tfplan.txt"),
             attachmentName: "tfplan.txt"
         }
 
@@ -184,11 +184,11 @@ export class TerraformDisplayPlainPlan extends TerraformDisplay {
         return this.run()
             .then((code) => {
                 if (this.stdout[0] && typeof this.stdout[0] === "string") {
-                    tasks.debug("Running tests, the are stupid.")
+                    this.tasks.debug("Running tests, the are stupid.")
                 } else {
                     tasks.writeFile(this.attachment.sourceFile, Buffer.concat(this.stdout))
                 }
-                tasks.addAttachment(this.attachment.type, this.attachment.attachmentName, this.attachment.sourceFile)
+                this.tasks.addAttachment(this.attachment.type, this.attachment.attachmentName, this.attachment.sourceFile)
                 return code
             })
             .catch((err) => {
@@ -204,16 +204,15 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
 
     constructor(
         taskAgent: ITaskAgent,
-        workingDirectory: string = "./",
-        planFilePath: string = "tfplan",
-        secureVarsFile?: string
+        ctx: ITerraformDisplayContext,
+        private readonly tasks: ITaskLib
     ) {
         super(
             taskAgent,
-            workingDirectory,
-            planFilePath,
+            ctx.cwd,
+            ctx.planFilePath,
             false,
-            secureVarsFile
+            ctx.secureVarsFile
         )
 
         this.arg("-json")
@@ -221,7 +220,7 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
 
         this.attachment = {
             type: "summary.json",
-            sourceFile: tasks.resolve(this.workingDirectory, "summary.json"),
+            sourceFile: this.tasks.resolve(this.workingDirectory, "summary.json"),
             attachmentName: "summary.json"
         }
     }
@@ -235,8 +234,8 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
 
                 if (this.produceWarningsAtSummary && summary) { this.produceWarnings(summary) }
 
-                tasks.writeFile(this.attachment.sourceFile, JSON.stringify(summary))
-                tasks.addAttachment(this.attachment.type, this.attachment.attachmentName, this.attachment.sourceFile)
+                this.tasks.writeFile(this.attachment.sourceFile, JSON.stringify(summary))
+                this.tasks.addAttachment(this.attachment.type, this.attachment.attachmentName, this.attachment.sourceFile)
 
                 return code
             })
@@ -259,7 +258,7 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
     private planWarningLine(t: string, resources: number, outputs: number) {
         const l: string = `This plan is going to ${t} ${this.getStr(resources, 'resource')} and ${this.getStr(outputs, 'output')}.`
         if (resources != 0 || outputs != 0) {
-            tasks.warning(l)
+            this.tasks.warning(l)
         }
     }
 
@@ -303,7 +302,7 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
                     summary = this.updateSummary(action, summary)
                 }
             } else {
-                tasks.debug("Got empty actions array. It is possible that plan json schema is different.")
+                this.tasks.debug("Got empty actions array. It is possible that plan json schema is different.")
                 errors = true
             }
         }
@@ -320,34 +319,34 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
 
         const jsonResult = JSON.parse(planJson.replace(/(\r\n|\r|\n)/gm, ""));
         if (!jsonResult) {
-            tasks.error("Failed to parse JSON plan output.")
-            tasks.setResult(tasks.TaskResult.SucceededWithIssues, "Failed to parse json plan.", false)
+            this.tasks.error("Failed to parse JSON plan output.")
+            this.tasks.setResult(tasks.TaskResult.SucceededWithIssues, "Failed to parse json plan.", false)
             return undefined
         }
 
         if (!jsonResult.format_version) {
-            tasks.warning("Terraform show json output does not have format_version key. Task code update might be required.")
+            this.tasks.warning("Terraform show json output does not have format_version key. Task code update might be required.")
         } else {
-            tasks.debug(`Getting values from plan json version: ${jsonResult.format_version}.`)
+            this.tasks.debug(`Getting values from plan json version: ${jsonResult.format_version}.`)
         }
 
         const resources: Array<any> = jsonResult.resource_changes as Array<any>
         if (!resources) {
-            tasks.debug("There is no 'resources' key in plan json. The plan does not have any resources defined.")
+            this.tasks.debug("There is no 'resources' key in plan json. The plan does not have any resources defined.")
             summary.resources = { toCreate: 0, toUpdate: 0, toDelete: 0, unchanged: 0 } // -1 to report unknow, because there is no way to calculate that.
         } else {
             summary.resources = this.getChanges(resources, (resource: any) => { return resource.change.actions || [] })
         }
 
         if (!jsonResult.output_changes) {
-            tasks.debug("No 'output_changes' key in the json plan, outputs are not defined for the plan.")
+            this.tasks.debug("No 'output_changes' key in the json plan, outputs are not defined for the plan.")
             summary.outputs = { toCreate: 0, toUpdate: 0, toDelete: 0, unchanged: 0 }
         } else {
             const outputs: Array<any> = Object.keys(jsonResult.output_changes).map((key) => { return jsonResult.output_changes[key] })
             summary.outputs = this.getChanges(outputs, (resource: any) => { return resource.actions || [] })
         }
 
-        tasks.debug("Calculated the following summary: " + JSON.stringify(summary))
+        this.tasks.debug("Calculated the following summary: " + JSON.stringify(summary))
 
         return summary
     }

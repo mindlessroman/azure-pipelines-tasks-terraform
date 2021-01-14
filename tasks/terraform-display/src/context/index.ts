@@ -6,6 +6,9 @@ export interface ITerraformDisplayContext extends ITaskContext {
 }
 
 export class TerraformDisplayContext extends AzdoTaskContext implements ITerraformDisplayContext {
+    get cwd(){
+        return this.getInput("workingDirectory") || "./"
+    }    
     get secureVarsFile(){
         return this.getInput("secureVarsFile");
     }

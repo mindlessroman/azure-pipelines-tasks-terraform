@@ -1,7 +1,7 @@
 import mockAnswer = require('azure-pipelines-task-lib/mock-answer')
 import mockRun = require('azure-pipelines-task-lib/mock-run')
 
-import TaskAgentMock from "../task-agent-mock";
+import { MockTaskAgent } from 'terraform-core'
 import path = require('path');
 
 const taskPath = path.join(__dirname, '..', 'index.js');
@@ -43,7 +43,7 @@ a.exec[`terraform show ${tfplan}`] =  {
     stdout: 'just a plan/n and another line',
 }
 
-taskRunner.registerMock('./task-agent', TaskAgentMock);
+taskRunner.registerMock('./task-agent', MockTaskAgent);
 taskRunner.setAnswers(a)
 taskRunner.run(false);
 
