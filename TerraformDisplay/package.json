@@ -1,0 +1,52 @@
+{
+  "name": "azure-pipelines-tasks-terraform-display",
+  "version": "0.1.0",
+  "description": "Azure deveops pipeline task to execute terraform cli commands",
+  "main": ".bin/index.js",
+  "scripts": {
+    "clean": "rimraf ./.bin ./.dist",
+    "build": "npx tsc --build && cpx \"src/tests/**/*.{env,vars}\" \".bin/tests\"",
+    "pack": "npx copyfiles package.json task.json icon.png \".bin/*.js\" -e \".bin/tests/*\" .dist && cd .dist && npm install --only=prod",
+    "delete": "npx tfx build tasks delete --task-id 320ec1e4-3b96-11eb-adc1-0242ac120002",
+    "upload": "npx tfx build tasks upload --task-path .dist",
+    "start": "node --require dotenv/config .bin/index.js",
+    "test": "npx nyc -r cobertura -r html \"./node_modules/.bin/mocha\" \".bin/tests/_suite.js\" --timeout 999999 --reporter mocha-junit-reporter --reporter-options \"mochaFile=./.test-output/terraform-cli.xml\"",
+    "test:local": "npx mocha \".bin/tests/_suite.js\" --timeout 999999"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/charleszipp/azure-pipelines-tasks-terraform.git"
+  },
+  "keywords": [
+    "terraform",
+    "azure-devops",
+    "vsts"
+  ],
+  "author": "Alex Goncharov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/charleszipp/azure-pipelines-tasks-terraform/issues"
+  },
+  "homepage": "https://github.com/charleszipp/azure-pipelines-tasks-terraform#readme",
+  "devDependencies": {
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^10.12.27",
+    "@types/q": "^1.5.1",
+    "braces": "^2.3.2",
+    "copyfiles": "^2.2.0",
+    "cpx": "^1.5.0",
+    "mocha": "^7.1.2",
+    "mocha-junit-reporter": "^1.18.0",
+    "nyc": "^15.0.0",
+    "tfx-cli": "^0.8.3",
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "applicationinsights": "^1.4.0",
+    "azure-devops-node-api": "^7.0.0",
+    "azure-pipelines-task-lib": "^2.7.1",
+    "dotenv": "^8.2.0",
+    "inversify": "^5.0.1",
+    "reflect-metadata": "^0.1.13"
+  }
+}

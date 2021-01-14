@@ -1,16 +1,15 @@
+import { getPersonalAccessTokenHandler, WebApi } from 'azure-devops-node-api';
+import { ITaskAgentApi } from 'azure-devops-node-api/TaskAgentApi';
+import * as tasks from 'azure-pipelines-task-lib/task';
 import fs from 'fs';
 import Q from 'q';
-import * as tasks from 'azure-pipelines-task-lib/task';
-import { WebApi, getPersonalAccessTokenHandler } from 'azure-devops-node-api';
-import { ITaskAgentApi } from 'azure-devops-node-api/TaskAgentApi';
-import { ITaskAgent } from '.';
 
-export default class TaskAgent implements ITaskAgent {
+export default class TaskAgent {
     private readonly api: WebApi;
 
     constructor() {
-        const url = tasks.getVariable('System.TeamFoundationCollectionUri') || "";
-        const credentials = tasks.getEndpointAuthorizationParameter('SYSTEMVSSCONNECTION', 'ACCESSTOKEN', false) || "";
+        const url: string = tasks.getVariable('System.TeamFoundationCollectionUri') || "";
+        const credentials: string = tasks.getEndpointAuthorizationParameter('SYSTEMVSSCONNECTION', 'ACCESSTOKEN', false) || "";
         const authHandler = getPersonalAccessTokenHandler(credentials);
 
         const proxy = tasks.getHttpProxyConfiguration();
@@ -34,7 +33,7 @@ export default class TaskAgent implements ITaskAgent {
             if(!ticket){
                 throw new Error(`Download ticket for SecureFileId ${secureFileId} not found.`);
             }
-            const project = tasks.getVariable('SYSTEM.TEAMPROJECT') || "";
+            const project:string = tasks.getVariable('SYSTEM.TEAMPROJECT') || ""; // TODO correct error handling
             const stream: NodeJS.WritableStream = (await agent.downloadSecureFile(project, secureFileId, ticket, false)).pipe(file);
             const deferred = Q.defer();
             stream.on('finish', () => { deferred.resolve(); });
