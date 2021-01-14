@@ -1,17 +1,17 @@
 {
   "name": "azure-pipelines-tasks-terraform-display",
   "version": "0.1.0",
-  "description": "Azure deveops pipeline task to execute terraform cli commands",
+  "description": "Azure Pipelines task to display terraform plans",
   "main": ".bin/index.js",
   "scripts": {
-    "clean": "rimraf ./.bin ./.dist",
-    "build": "npx tsc --build && cpx \"src/tests/**/*.{env,vars}\" \".bin/tests\"",
-    "pack": "npx copyfiles package.json task.json icon.png \".bin/*.js\" -e \".bin/tests/*\" .dist && cd .dist && npm install --only=prod",
-    "delete": "npx tfx build tasks delete --task-id 320ec1e4-3b96-11eb-adc1-0242ac120002",
+    "build": "npx tsc --build",
+    "test": "cucumber-js -p default",
+    "test:coverage": "nyc -r cobertura -r html \"cucumber-js\" \"-p\" \"default\"",
+    "test:report": "mkdir -p .tests && cucumber-js -p report | grep -Ev '^##vso|^\\[command]|^[a-zA-Z0-9]' | cucumber-junit > ./.tests/results.xml",
+    "start": "ts-node --require dotenv/config ./src/index.ts",
+    "pack": "npx copyfiles package.json task.json icon.png \".bin/*.js\" .dist && cd .dist && npm install --only=prod",
     "upload": "npx tfx build tasks upload --task-path .dist",
-    "start": "node --require dotenv/config .bin/index.js",
-    "test": "npx nyc -r cobertura -r html \"./node_modules/.bin/mocha\" \".bin/tests/_suite.js\" --timeout 999999 --reporter mocha-junit-reporter --reporter-options \"mochaFile=./.test-output/terraform-cli.xml\"",
-    "test:local": "npx mocha \".bin/tests/_suite.js\" --timeout 999999"
+    "delete": "npx tfx build tasks delete --task-id 320ec1e4-3b96-11eb-adc1-0242ac120002"
   },
   "repository": {
     "type": "git",
@@ -39,6 +39,8 @@
     "mocha-junit-reporter": "^1.18.0",
     "nyc": "^15.0.0",
     "tfx-cli": "^0.8.3",
+    "ts-mocha": "^8.0.0",
+    "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   },
   "dependencies": {

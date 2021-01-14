@@ -7,16 +7,17 @@
     "helpMarkDown": "",
     "category": "Utility",
     "visibility": [
-        "Build"
+        "Build",
+        "Release"
     ],
     "demands": [],
     "version": {
-        "Major": 0,
-        "Minor": 0,
-        "Patch": 8
+        "Major": "#{GitVersion.Major}#",
+        "Minor": "#{GitVersion.Minor}#",
+        "Patch": "#{GitVersion.Patch}#"
     },
     "minimumAgentVersion": "1.95.0",
-    "instanceNameFormat": "terraformDisplay",
+    "instanceNameFormat": "terraform display",
     "groups": [ ],
     "inputs": [
         {
