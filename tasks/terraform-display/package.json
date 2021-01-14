@@ -49,6 +49,7 @@
     "azure-pipelines-task-lib": "^2.7.1",
     "dotenv": "^8.2.0",
     "inversify": "^5.0.1",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.1.13",
+    "terraform-core": "file:../terraform-core"
   }
 }

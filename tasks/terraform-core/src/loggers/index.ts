@@ -1,0 +1,9 @@
+export interface ILogger {
+    command(success: boolean, duration: number): void;
+    error(error: string | Error, properties?: any): void;
+    warning(message: string): void;
+    debug(message: string): void;
+}
+
+export { default as ApplicationInsightsLogger } from './ai-logger'
+export { default as TaskLogger } from './task-logger'

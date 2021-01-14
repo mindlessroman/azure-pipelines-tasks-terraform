@@ -123,6 +123,24 @@
 				"install - extension"
 			],
 			"dependsOrder": "parallel"
+		},
+		{
+			"type": "typescript",
+			"tsconfig": "tasks/terraform-core/tsconfig.json",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build",
+			"label": "build - tasks/terraform-core"
+		},
+		{
+			"type": "typescript",
+			"tsconfig": "tasks/terraform-display/tsconfig.json",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build",
+			"label": "build - tasks/terraform-display"
 		}
 	],
 	"inputs": [

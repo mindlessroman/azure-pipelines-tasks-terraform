@@ -1,7 +1,7 @@
 import tasks = require('azure-pipelines-task-lib/task');
 import { IExecOptions, ToolRunner } from 'azure-pipelines-task-lib/toolrunner';
 import * as dotenv from "dotenv";
-import TaskAgent from './task-agent';
+import { ITaskAgent } from 'terraform-core'
 
 
 interface TerrafromDisplayAttachment {
@@ -30,16 +30,17 @@ export class TerraformDisplay {
     protected readonly workingDirectory: string
     protected stdout: Buffer[] = [];
     protected stderr: Buffer[] = [];
-    protected taskAgent: TaskAgent
+    protected taskAgent: ITaskAgent
     protected execOptions: IExecOptions
     protected args: string[] = []
     protected uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
     constructor(
+        taskAgent: ITaskAgent,
         workingDirectory: string = "./",
         planFilePath: string = "tfplan",
         silent: boolean = false,
-        secureVarsFile?: string,
+        secureVarsFile?: string        
     ) {
 
         this.workingDirectory = tasks.resolve(workingDirectory)
@@ -62,7 +63,7 @@ export class TerraformDisplay {
         }
 
         this.secureVarsFile = secureVarsFile
-        this.taskAgent = new TaskAgent()
+        this.taskAgent = taskAgent;
     }
 
     private async getSecureVarsFile(idOrName: string): Promise<string> {
@@ -156,11 +157,13 @@ export class TerraformDisplayPlainPlan extends TerraformDisplay {
     private attachment: TerrafromDisplayAttachment
 
     constructor(
+        taskAgent: ITaskAgent,
         workingDirectory: string = "./",
         planFilePath: string = "tfplan",
         secureVarsFile?: string
     ) {
         super(
+            taskAgent,
             workingDirectory,
             planFilePath,
             false,
@@ -200,11 +203,13 @@ export class TerraformDisplayJsonPlan extends TerraformDisplay {
     private attachment: TerrafromDisplayAttachment
 
     constructor(
+        taskAgent: ITaskAgent,
         workingDirectory: string = "./",
         planFilePath: string = "tfplan",
         secureVarsFile?: string
     ) {
         super(
+            taskAgent,
             workingDirectory,
             planFilePath,
             false,
