@@ -45,6 +45,11 @@ export class TaskAnswersSteps {
         this.answerToolExists("az", true);
     }
 
+    @given("azure cli not exists")
+    public answerAzureCliNotExists(){
+        this.answerToolExists("az", false);
+    }
+
     @given("running command {string} returns successful result")
     public runningCommandReturnsSuccessfulResult(command: string){
         this.answers.exec[command] = <TaskLibAnswerExecResult>{
