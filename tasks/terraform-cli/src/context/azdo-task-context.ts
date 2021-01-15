@@ -115,6 +115,9 @@ export default class AzdoTaskContext implements ITaskContext {
     get planOrStateFilePath() {
         return this.getInput("inputTargetPlanOrStateFilePath");
     }
+    get runAzLogin() {
+        return this.getBoolInput("runAzLogin");
+    }
     finished() {
         this.finishedAt = process.hrtime(this.startedAt);
         this.runTime = this.finishedAt[1] / 1000000;

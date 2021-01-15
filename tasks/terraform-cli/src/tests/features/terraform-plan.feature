@@ -27,6 +27,7 @@ Feature: terraform plan
             | -t ten1                   |
             | -u servicePrincipal1      |
             | -p servicePrincipalKey123 |
+        And task configured to run az login
         And running command "terraform plan" returns successful result
         When the terraform cli task is run
         Then the terraform cli task executed command "terraform plan" with the following environment variables
@@ -59,6 +60,7 @@ Feature: terraform plan
             | -t ten1                   |
             | -u servicePrincipal1      |
             | -p servicePrincipalKey123 |
+        And task configured to run az login
         And running command "terraform plan -input=true -lock=false -no-color" returns successful result
         When the terraform cli task is run        
         Then the terraform cli task executed command "terraform plan -input=true -lock=false -no-color" with the following environment variables
@@ -84,13 +86,7 @@ Feature: terraform plan
             | tenantId       | ten1                   |
             | clientId       | servicePrincipal1      |
             | clientSecret   | servicePrincipalKey123 |
-        And azure cli exists
-        And running command "az login" with the following options returns successful result
-            | option                    |
-            | --service-principal       |
-            | -t ten1                   |
-            | -u servicePrincipal1      |
-            | -p servicePrincipalKey123 |
+        And azure cli not exists
         And running command "terraform plan -var-file=./default.vars" returns successful result
         When the terraform cli task is run        
         Then the terraform cli task executed command "terraform plan -var-file=./default.vars" with the following environment variables
@@ -98,12 +94,6 @@ Feature: terraform plan
             | ARM_TENANT_ID       | ten1                   |
             | ARM_CLIENT_ID       | servicePrincipal1      |
             | ARM_CLIENT_SECRET   | servicePrincipalKey123 |
-        And azure login is executed with the following options
-            | option                |
-            | --service-principal       |
-            | -t ten1                   |
-            | -u servicePrincipal1      |
-            | -p servicePrincipalKey123 |
         And the terraform cli task is successful
         And pipeline variable "TERRAFORM_LAST_EXITCODE" is set to "0"
 
@@ -123,6 +113,7 @@ Feature: terraform plan
             | -t ten1                   |
             | -u servicePrincipal1      |
             | -p servicePrincipalKey123 |
+        And task configured to run az login
         And running command "terraform plan -input=true -lock=false -no-color -detailed-exitcode" returns successful result with exit code 2
         When the terraform cli task is run        
         Then the terraform cli task executed command "terraform plan -input=true -lock=false -no-color -detailed-exitcode" with the following environment variables
@@ -156,6 +147,7 @@ Feature: terraform plan
             | -t ten1                   |
             | -u servicePrincipal1      |
             | -p servicePrincipalKey123 |
+        And task configured to run az login
         And running command "terraform plan -input=true -lock=false -no-color -detailed-exitcode" returns successful result with exit code 0
         When the terraform cli task is run        
         Then the terraform cli task executed command "terraform plan -input=true -lock=false -no-color -detailed-exitcode" with the following environment variables
@@ -189,6 +181,7 @@ Feature: terraform plan
             | -t ten1                   |
             | -u servicePrincipal1      |
             | -p servicePrincipalKey123 |
+        And task configured to run az login
         And secure file specified with id "6b4ef608-ca4c-4185-92fb-0554b8a2ec72" and name "./src/tests/default.vars"
         And running command "terraform plan -var-file=./src/tests/default.vars" returns successful result
         When the terraform cli task is run
@@ -222,6 +215,7 @@ Feature: terraform plan
             | -t ten1                   |
             | -u servicePrincipal1      |
             | -p servicePrincipalKey123 |
+        And task configured to run az login
         And secure file specified with id "6b4ef608-ca4c-4185-92fb-0554b8a2ec72" and name "./src/tests/default.env"
         And running command "terraform plan" returns successful result
         When the terraform cli task is run

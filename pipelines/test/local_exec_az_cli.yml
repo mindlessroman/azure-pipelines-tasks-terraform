@@ -35,6 +35,7 @@ jobs:
         environmentServiceName: 'env_test'
         secureVarsFile: 85f60b61-3430-4e92-83be-ea5b16eafaaf
         commandOptions: '-out=$(System.DefaultWorkingDirectory)/terraform.tfplan'
+        runAzLogin: true
     - task: TerraformCLI@0
       displayName: 'terraform apply'
       inputs:
@@ -42,6 +43,7 @@ jobs:
         workingDirectory: $(test_templates_dir)
         environmentServiceName: 'env_test'
         commandOptions: '$(System.DefaultWorkingDirectory)/terraform.tfplan'
+        runAzLogin: true
     - task: TerraformCLI@0
       displayName: 'terraform destroy'
       inputs:
@@ -49,3 +51,4 @@ jobs:
         workingDirectory: $(test_templates_dir)
         environmentServiceName: 'env_test'
         secureVarsFile: 85f60b61-3430-4e92-83be-ea5b16eafaaf
+        runAzLogin: true

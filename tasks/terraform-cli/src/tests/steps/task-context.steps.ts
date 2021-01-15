@@ -87,6 +87,11 @@ export class TaskContextSteps {
         this.ctx.planOrStateFilePath = planOrStateFile;
     }
 
+    @given("task configured to run az login")
+    public taskConfiguredToRunAzLogin(){
+        this.ctx.runAzLogin = true;
+    }
+
     @then("pipeline variable {string} is set to {string}")
     public pipelineVariableIsSet(key: string, value: string){
         const variable = this.ctx.variables[key];

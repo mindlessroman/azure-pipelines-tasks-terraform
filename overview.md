@@ -68,7 +68,43 @@ When executing commands that interact with Azure such as `plan`, `apply`, and `d
 
 ### **Execute Azure CLI From Local-Exec Provisioner (NEW)**
 
-When an azure service connection is provided, the terraform cli task will run `az login` using the service connection credentials. This is intended to enable templates to execute az cli commands from a `local-exec` provisioner.
+When an azure service connection is provided and `runAzLogin` is set to `true`, the terraform cli task will run `az login` using the service connection credentials. This is intended to enable templates to execute az cli commands from a `local-exec` provisioner.
+
+Setting `runAzLogin` to `true` will indicate the task should execute `az login` with specified service connection.
+
+```yaml
+- task: TerraformCLI
+    displayName: 'terraform apply'
+    inputs:
+        command: apply
+        environmentServiceName: 'My Azure Service Connection'
+        # indicate az login should be run as part of this command
+        runAzLogin: true
+```
+
+Setting `runAzLogin` to `false` will indicate the task should not execute `az login` with specified service connection.
+
+```yaml
+- task: TerraformCLI
+    displayName: 'terraform apply'
+    inputs:
+        command: apply
+        environmentServiceName: 'My Azure Service Connection'
+        # indicate az login should be run as part of this command
+        runAzLogin: true
+```
+
+`runAzLogin`  will default to `false` when not specified; indicating the task should NOT run `az login`
+
+```yaml
+- task: TerraformCLI
+    displayName: 'terraform apply'
+    inputs:
+        command: apply
+        environmentServiceName: 'My Azure Service Connection'
+        # indicate az login should be run as part of this command
+        runAzLogin: true
+```
 
 This should allow the following template configuation to be run using this task
 
