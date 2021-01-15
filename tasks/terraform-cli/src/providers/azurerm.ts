@@ -33,9 +33,12 @@ export default class AzureRMProvider implements ITerraformProvider {
         process.env['ARM_CLIENT_ID']        = config.clientId;
         process.env['ARM_CLIENT_SECRET']    = config.clientSecret;
 
-        //run az login so provisioners needing az cli can be run.
-        await new CommandPipeline(this.runner)
-            .azLogin()
-            .exec(ctx);
+        if(ctx.runAzLogin){
+            //run az login so provisioners needing az cli can be run.
+            await new CommandPipeline(this.runner)
+                .azLogin()
+                .exec(ctx);
+        }
+        
     }
 }

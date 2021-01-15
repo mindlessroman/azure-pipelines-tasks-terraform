@@ -33,6 +33,7 @@ export default class MockTaskContext implements ITaskContext {
     resourceId: string = "";
     lockId: string = "";
     planOrStateFilePath: string = "";
+    runAzLogin?: boolean = false;
     public readonly startedAt: [number, number];
     private _finishedAt: [number, number] | undefined;
     runTime: number = 0;

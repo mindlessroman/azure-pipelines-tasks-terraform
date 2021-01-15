@@ -89,6 +89,16 @@
             "helpMarkDown": "Select an Azure service connection if you would like the azurerm provider configured for you (using the service principal credentials configured in the selected service connection). **This field is optional.** Leave empty should you choose to self-configure the provider(s) used. Provider environment variables can be configured securely by selecting an env file from the `Secured Variables File` pick list."
         },
         {
+            "name": "runAzLogin",
+            "type": "boolean",
+            "label": "Run Azure CLI Login",
+            "defaultValue": "false",
+            "required": false,
+            "visibleRule": "command = plan || command = apply || command = destroy || command = refresh || command = import",
+            "helpMarkDown": "If checked, task will execute az login to enable local-exec provisioner to run az cli commands",
+            "groupName": "backendAzureRm"
+        },
+        {
             "name": "secureVarsFile",
             "type": "secureFile",
             "label": "Secured Variables File (Secrets)",
