@@ -4,25 +4,36 @@ import mock from 'mock-require';
 import { ITaskLoggerLib, MockTaskAgent, resetRequestedAnswers, TaskLogger, TaskRunner } from 'terraform-core'
 import TerraformDisplayTask from '../task';
 import { MockTerraformDisplayContext } from '../context';
+import { TaskAnswers } from 'terraform-core';
 
 mock("azure-pipelines-task-lib/mock-answer", "./mock-answer-spy");
 
 describe('TerraformDisplay task tests.', function () {
 
-    before( function() {
+    beforeEach( function() {
         const ctx = new MockTerraformDisplayContext();
         const taskAgent = new MockTaskAgent();
         const logger = new TaskLogger(ctx, <ITaskLoggerLib><any>tasks);
         const task = new TerraformDisplayTask(ctx, taskAgent, logger);
         this.taskRunner = new TaskRunner(task);
+        this.answers = new TaskAnswers()
     });
 
-    after(() => {
+    beforeEach(() => {
         resetRequestedAnswers();
     });
 
-    it('should succeed with no inputs', function() {
-        assert.strictEqual(true, true);
+    it('should succeed with no inputs', async function() {
+        try
+        {
+            //await this.taskRunner.run(this.answers);
+            assert.strictEqual(true, true);
+        }
+        catch(err)
+        {
+            console.log(err);
+        }
+        
         // this.timeout(10000);
     
         // const testPath = path.join(__dirname, 'success-with-no-args.js')

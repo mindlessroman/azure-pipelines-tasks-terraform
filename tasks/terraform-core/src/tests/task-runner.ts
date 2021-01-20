@@ -12,11 +12,6 @@ export default class TaskRunner {
     }
 
     public async run(taskAnswers: ma.TaskLibAnswers) {
-        // const toolFactory = new MockToolFactory(tasks);
-        // const taskAgent = new MockTaskAgent()
-        // const logger = new TaskLogger(taskContext, <ITaskLoggerLib><any>tasks)
-        // const runner = new AzdoRunner(toolFactory, logger);
-        // const task = new Task(taskContext, runner, taskAgent, logger);
         setAnswers(taskAnswers);
         try{
             //separate the stdout from task and cucumbers test
