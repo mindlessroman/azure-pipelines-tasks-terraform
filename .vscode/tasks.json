@@ -141,6 +141,22 @@
 			],
 			"group": "build",
 			"label": "build - tasks/terraform-display"
+		},
+		{
+			"type": "npm",
+			"script": "install",
+			"path": "tasks/terraform-display/",
+			"problemMatcher": [],
+			"label": "install - tasks/terraform-display",
+			"detail": "install dependencies from package"
+		},
+		{
+			"type": "npm",
+			"script": "install",
+			"path": "tasks/terraform-core/",
+			"problemMatcher": [],
+			"label": "install - tasks/terraform-core",
+			"detail": "install dependencies from package"
 		}
 	],
 	"inputs": [

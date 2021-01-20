@@ -2,8 +2,8 @@ import * as assert from 'assert';
 import * as tasks from "azure-pipelines-task-lib/mock-task";
 import mock from 'mock-require';
 import { ITaskLoggerLib, MockTaskAgent, resetRequestedAnswers, TaskLogger, TaskRunner } from 'terraform-core'
-import TerraformDisplayTask from 'src/task';
-import { MockTerraformDisplayContext } from 'src/context';
+import TerraformDisplayTask from '../task';
+import { MockTerraformDisplayContext } from '../context';
 
 mock("azure-pipelines-task-lib/mock-answer", "./mock-answer-spy");
 

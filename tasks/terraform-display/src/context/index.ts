@@ -1,4 +1,4 @@
-import { AzdoTaskContext, ITaskContext, MockTaskContext } from "terraform-core";
+import { AzdoTaskContext, ITaskContext, MockTaskContext, ITaskLib } from "terraform-core";
 
 export interface ITerraformDisplayContext extends ITaskContext {
     secureVarsFile: string | undefined;
@@ -6,6 +6,9 @@ export interface ITerraformDisplayContext extends ITaskContext {
 }
 
 export class TerraformDisplayContext extends AzdoTaskContext implements ITerraformDisplayContext {
+    constructor(tasks: ITaskLib) {
+        super(tasks);        
+    }
     get cwd(){
         return this.getInput("workingDirectory") || "./"
     }    

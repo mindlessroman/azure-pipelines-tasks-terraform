@@ -5,7 +5,7 @@
   "main": ".bin/index.js",
   "scripts": {
     "build": "npx tsc --build",
-    "test": "cucumber-js -p default",
+    "test": "ts-mocha ./src/tests/_suite.ts",
     "test:coverage": "nyc -r cobertura -r html \"cucumber-js\" \"-p\" \"default\"",
     "test:report": "mkdir -p .tests && cucumber-js -p report | grep -Ev '^##vso|^\\[command]|^[a-zA-Z0-9]' | cucumber-junit > ./.tests/results.xml",
     "start": "ts-node --require dotenv/config ./src/index.ts",
@@ -30,6 +30,7 @@
   "homepage": "https://github.com/charleszipp/azure-pipelines-tasks-terraform#readme",
   "devDependencies": {
     "@types/mocha": "^5.2.6",
+    "@types/mock-require": "^2.0.0",
     "@types/node": "^10.12.27",
     "@types/q": "^1.5.1",
     "braces": "^2.3.2",
@@ -37,6 +38,7 @@
     "cpx": "^1.5.0",
     "mocha": "^7.1.2",
     "mocha-junit-reporter": "^1.18.0",
+    "mock-require": "^3.0.3",
     "nyc": "^15.0.0",
     "tfx-cli": "^0.8.3",
     "ts-mocha": "^8.0.0",
