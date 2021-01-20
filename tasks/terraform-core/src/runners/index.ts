@@ -1,4 +1,6 @@
 import { IExecOptions } from 'azure-pipelines-task-lib/toolrunner';
+import * as tools from 'azure-pipelines-task-lib/toolrunner';
+import * as mocks from 'azure-pipelines-task-lib/mock-toolrunner';
 
 export class RunnerOptions{
     private _args: string[];
@@ -47,6 +49,17 @@ export interface IToolRunner {
 
 export interface IToolFactory {
     create(tool: string): IToolRunner
+}
+
+
+export interface ITaskToolLib {
+    which: (tool: string, check?: boolean) => string;
+    tool: (tool: string) => tools.ToolRunner
+}
+
+export interface IMockTaskToolLib {
+    which: (tool: string, check?: boolean) => string;
+    tool: (tool: string) => mocks.ToolRunner;
 }
 
 export { default as AzdoRunner } from './azdo-runner';

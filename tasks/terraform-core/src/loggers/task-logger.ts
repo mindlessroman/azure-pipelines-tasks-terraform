@@ -1,11 +1,10 @@
-import { ILogger } from ".";
-import { ITaskLib } from "..";
+import { ILogger, ITaskLoggerLib } from ".";
 import { ITaskContext } from "../context";
 
 export default class TaskLogger implements ILogger {    
     constructor(
         private readonly ctx: ITaskContext, 
-        private readonly tasks: ITaskLib){
+        private readonly tasks: ITaskLoggerLib){
     }
 
     command(success: boolean, duration: number): void {

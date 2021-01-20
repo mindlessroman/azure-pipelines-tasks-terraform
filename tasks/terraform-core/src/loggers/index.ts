@@ -5,5 +5,11 @@ export interface ILogger {
     debug(message: string): void;
 }
 
+export interface ITaskLoggerLib {
+    debug: (message: string) => void;
+    error: (message: string) => void;
+    warning: (message: string) => void;
+}
+
 export { default as ApplicationInsightsLogger } from './ai-logger'
 export { default as TaskLogger } from './task-logger'

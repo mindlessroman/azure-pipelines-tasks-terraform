@@ -2,13 +2,12 @@ import fs from 'fs';
 import Q from 'q';
 import { WebApi, getPersonalAccessTokenHandler } from 'azure-devops-node-api';
 import { ITaskAgentApi } from 'azure-devops-node-api/TaskAgentApi';
-import { ITaskAgent } from '.';
-import { ITaskLib } from '..';
+import { ITaskAgent, ITaskAgentLib } from '.';
 
 export default class TaskAgent implements ITaskAgent {
     private readonly api: WebApi;
 
-    constructor(private readonly tasks: ITaskLib) {
+    constructor(private readonly tasks: ITaskAgentLib) {
 
         const url = tasks.getVariable('System.TeamFoundationCollectionUri') || "";
         const credentials = tasks.getEndpointAuthorizationParameter('SYSTEMVSSCONNECTION', 'ACCESSTOKEN', false) || "";

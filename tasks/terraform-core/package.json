@@ -13,9 +13,13 @@
     "applicationinsights": "^1.8.8",
     "azure-devops-node-api": "^10.2.1",
     "azure-pipelines-task-lib": "^3.0.6-preview.1",
+    "intercept-stdout": "^0.1.2",
+    "mock-require": "^3.0.3",
     "q": "^1.5.1"
   },
   "devDependencies": {
+    "@types/intercept-stdout": "^0.1.0",
+    "@types/mock-require": "^2.0.0",
     "@types/node": "^14.14.20",
     "@types/q": "^1.5.4",
     "ts-node": "^9.1.1",

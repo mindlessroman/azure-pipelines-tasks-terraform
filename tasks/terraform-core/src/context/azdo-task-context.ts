@@ -7,7 +7,6 @@ export default class AzdoTaskContext implements ITaskContext {
     protected getEndpointAuthorizationScheme: (id: string, optional: boolean) => string;
     protected getEndpointDataParameter: (id: string, key: string, optional: boolean) => string;
     protected getEndpointAuthorizationParameter: (id: string, key: string, optional: boolean) => string;
-    protected getSecureFileName: (id: string) => string;
     protected getVariable: (name: string) => string | undefined; 
     public setVariable: (name: string, val: string, secret?: boolean | undefined) => void;
     public startedAt: [number, number];
@@ -21,7 +20,6 @@ export default class AzdoTaskContext implements ITaskContext {
         this.getEndpointAuthorizationParameter = <(id: string, key: string, optional: boolean) => string>tasks.getEndpointAuthorizationParameter;
         this.setVariable = tasks.setVariable;
         this.getVariable = tasks.getVariable;
-        this.getSecureFileName = <(id: string) => string>tasks.getSecureFileName;
         this.startedAt = process.hrtime();
     }
     get name() {

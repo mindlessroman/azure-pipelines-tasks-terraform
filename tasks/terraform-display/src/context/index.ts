@@ -1,4 +1,4 @@
-import { AzdoTaskContext, ITaskContext } from "terraform-core";
+import { AzdoTaskContext, ITaskContext, MockTaskContext } from "terraform-core";
 
 export interface ITerraformDisplayContext extends ITaskContext {
     secureVarsFile: string | undefined;
@@ -15,4 +15,9 @@ export class TerraformDisplayContext extends AzdoTaskContext implements ITerrafo
     get planFilePath(){
         return this.getInput("planFilePath") || "tfplan";
     }
+}
+
+export class MockTerraformDisplayContext extends MockTaskContext implements ITerraformDisplayContext {
+    secureVarsFile: string | undefined = "";
+    planFilePath: string = "";
 }
